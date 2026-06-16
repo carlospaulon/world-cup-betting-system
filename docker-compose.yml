@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: wordcup_betting_db
+    restart: always
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: wordcupbetting_db
+    
+    ports:
+      - "5433:5432"
+    
+    volumes:
+      - wordcup_betting_pg_data:/var/lib/postgresql/data
+
+volumes:
+  wordcup_betting_pg_data:
