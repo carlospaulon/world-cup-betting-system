@@ -19,6 +19,7 @@ class User(Base):
     date_of_birth: Mapped[date] = mapped_column()
     points: Mapped[int] = mapped_column(default=100)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now()) # server default, ensure that we have the exacly registry of the timestamp
 
 
