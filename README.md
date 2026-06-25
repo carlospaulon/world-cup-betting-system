@@ -15,6 +15,14 @@ Atualmente estou:
 * Definindo a stack do projeto
 * Estruturando o ambiente
 
+## Arquitetura
+
+### Diagrama Lógico
+![Diagrama Lógico](docs/diagrama_logico.png)
+
+### Diagrama Conceitual
+![Diagrama Conceitual](docs/diagrama_conceitual.png)
+
 ## Stack atual
 
 * Python
@@ -28,8 +36,6 @@ Atualmente estou:
 * Alembic
 * JWT (jose)
 * python-dotenv
-
-## Stack em avaliação
 * httpx
 
 ## Próximos Passos
