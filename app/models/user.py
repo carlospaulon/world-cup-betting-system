@@ -14,7 +14,7 @@ class User(Base):
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     nickname: Mapped[str] = mapped_column(String(150), nullable=False)
     email: Mapped[str] = mapped_column(String(150), nullable=False, unique=True)
-    cpf: Mapped[str] = mapped_column(String(11), nullable=False, unique=True) # Unique?
+    cpf: Mapped[str] = mapped_column(String(11), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     date_of_birth: Mapped[date] = mapped_column()
     points: Mapped[int] = mapped_column(default=100)
