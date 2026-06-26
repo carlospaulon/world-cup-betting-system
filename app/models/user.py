@@ -1,4 +1,5 @@
 import uuid
+from typing import TYPE_CHECKING
 from datetime import datetime, date
 from sqlalchemy import Uuid
 from sqlalchemy import func
@@ -7,6 +8,8 @@ from sqlalchemy import String
 from sqlalchemy import Boolean
 from .base import Base
 
+if TYPE_CHECKING:
+    from .bet import Bet
 
 class User(Base):
     __tablename__ = 'users'
@@ -22,6 +25,11 @@ class User(Base):
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now()) # server default, ensure that we have the exacly registry of the timestamp
 
+    bets: Mapped[list["Bet"]] = relationship(
+        back_populates="user",
+        lazy="selectin",
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f'User: {self.id}, name={self.nickname}'
