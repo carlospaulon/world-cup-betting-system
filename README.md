@@ -2,18 +2,18 @@
 
 Sistema de apostas para a Copa do Mundo 2026 desenvolvido como projeto final do curso Futuro Digital.
 
-> **Aviso:** Este projeto encontra-se em fase inicial de planejamento. A estrutura, arquitetura e tecnologias utilizadas podem acabar sofrendo alterações durante o desenvolvimento.
+> **Aviso:** Em desenvolvimento ativo. A estrutura, arquitetura e tecnologias utilizadas podem acabar sofrendo alterações durante o desenvolvimento.
 
 ## Status do Projeto
 
-Em fase de planejamento e modelagem.
-
-Atualmente estou:
-
-* Modelando as entidades e entendendo os requisitos
-* Criando diagramas para visualizar a arquitetura da aplicação
-* Definindo a stack do projeto
-* Estruturando o ambiente
+| Etapa | Descrição | Status |
+|---|---|---|
+| Fundação | Entidades, migrations, Docker, configurações | Concluído |
+| Autenticação | Registro, login JWT, troca de senha | Em andamento |
+| Partidas | Importação via API externa, gestão admin | Pendente |
+| Apostas | Criação, odds em tempo real, multiplicação | Pendente |
+| Liquidação | Processamento de resultados e pontos | Pendente |
+| Exceções e docs | Handlers globais, docstrings, Swagger | Pendente |
 
 ## Arquitetura
 
@@ -38,9 +38,21 @@ Atualmente estou:
 * python-dotenv
 * httpx
 
+
+## Como rodar
+
+```bash
+docker compose up -d
+uvicorn app.main:app --reload
+```
+
+Acesse a documentação em `http://localhost:8000/docs`
+
+
 ## Próximos Passos
 
-* Definição do modelo de domínio
-* Estruturação do projeto
-* Configuração do ambiente de desenvolvimento
-* Implementação das primeiras entidades e regras de negócio
+- [ ] Autenticação JWT e registro com validação de idade
+- [ ] Integração com API football-data.org
+- [ ] Sistema de apostas com odds em tempo real
+- [ ] Liquidação automática de apostas ao finalizar partida
+- [ ] Exceções personalizadas e handlers globais
