@@ -3,9 +3,9 @@ from datetime import date, datetime
 from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 
 class UserCreate(BaseModel):
-    nickname: str = Field()
+    nickname: str = Field(min_length=3)
     email: EmailStr
-    cpf: str = Field(max_length=11)
+    cpf: str = Field(min_length=11, max_length=11) # usar o cpf validator do validate_docbr
     password: str = Field(min_length=8, max_length=255)
     date_of_birth: date
 
