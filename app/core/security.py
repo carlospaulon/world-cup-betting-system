@@ -5,27 +5,30 @@ from app.core.config import get_settings
 from datetime import datetime, UTC, timedelta
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
+from app.core.exceptions import WeakPasswordException, InvalidCredentialsException, UserInactiveException
 from jose import jwt, JWTError
 
 settings = get_settings()
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
+
+# Usar como parâmetro da função
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-#Declaro como classmethod?
-@classmethod 
-def validate_password_strength(cls, password: str) -> str:
+# Aqui ou no schema como field validator
+# Trabalhar com plain password, hashpassword ou SecretStr
+def validate_password_strength(password: str) -> str:
         """Verifica se a senha atende aos requisitos de complexidade."""
-        # Tamanho da senha verificada na entidade/schema?
+        # Tamanho da senha verificada na entidade/schema
         if not re.search(r"[A-Z]", password):
-            raise ValueError("A senha deve conter pelo menos uma letra maiúscula.")
+            raise WeakPasswordException("A senha deve conter pelo menos uma letra maiúscula.")
         if not re.search(r"[a-z]", password):
-            raise ValueError("A senha deve conter pelo menos uma letra minúscula.")
+            raise WeakPasswordException("A senha deve conter pelo menos uma letra minúscula.")
         if not re.search(r"\d", password):
-            raise ValueError("A senha deve conter pelo menos um número.")
+            raise WeakPasswordException("A senha deve conter pelo menos um número.")
         if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
-            raise ValueError("A senha deve conter pelo menos um caractere especial.")
+            raise WeakPasswordException("A senha deve conter pelo menos um caractere especial.")
         return password
 
 #Bcrypt - hashed passwrod
@@ -48,13 +51,13 @@ def decode_token(token: str):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except JWTError:
-        raise HTTPException(
+        raise InvalidCredentialsException(
+            message="Invalid or expire token",
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expire token",
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-# Evoluir depois com DB = db: AsyncSession = Depends(get_db) e buscar o User pelo sub do payload — retornando o objeto completo ou 404.
+# Evoluir depois com DB = db: Session = Depends(get_db) e buscar o User pelo sub do payload — retornando o objeto completo ou 404.
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     payload = decode_token(token)
     username: str = payload.get("sub")
@@ -63,6 +66,10 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials"
         )
+    
+    if not username.is_active:
+        raise UserInactiveException()
+    
     return username # Por enquanto até retornar o schema
 
 # Criar get_current_admin
