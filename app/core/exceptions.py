@@ -1,8 +1,9 @@
 class AppException(Exception):
-    def __init__(self, message: str, status_code: int):
+    def __init__(self, message: str, status_code: int, headers: dict | None = None):
         super().__init__(message)
         self.message = message
         self.status_code = status_code
+        self.headers = headers
 
 class UnderageUserException(AppException):
     def __init__(self, message: str = "User must be at least 18 years old", status_code: int = 400):
@@ -13,8 +14,8 @@ class UserAlreadyExistsException(AppException):
         super().__init__(message, status_code)
 
 class InvalidCredentialsException(AppException):
-    def __init__(self, message: str = 'Invalid email or password', status_code: int = 401):
-        super().__init__(message, status_code)
+    def __init__(self, message: str = 'Invalid email or password', status_code: int = 401, headers: dict = {}):
+        super().__init__(message, status_code, headers)
 
 class UserNotFoundException(AppException):
     def __init__(self, message: str = 'User was not found', status_code: int = 404):
