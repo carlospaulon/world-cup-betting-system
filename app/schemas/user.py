@@ -38,7 +38,7 @@ class UserCreate(BaseModel):
 
     @field_validator("password")
     @classmethod
-    def check_password(value: str) -> str:
+    def check_password(cls, value: str) -> str:
         validate_password_strength(value)
         return value
 
