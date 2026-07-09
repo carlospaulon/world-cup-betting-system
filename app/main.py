@@ -14,6 +14,7 @@ app = FastAPI()
 def global_exception_handler(request: Request, exc: AppException):
     return JSONResponse(
         status_code=exc.status_code,
+        headers=getattr(exc, 'headers', None),
         content={
             "error": exc.__class__.__name__,
             "message": exc.message,
