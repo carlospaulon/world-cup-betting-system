@@ -5,6 +5,7 @@ from .core.database import get_db
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from .core.exceptions import AppException
+from app.routers import auth
 
 app = FastAPI()
 
@@ -21,6 +22,7 @@ def global_exception_handler(request: Request, exc: AppException):
         }
     )
 
+app.include_router(auth.router)
 
 @app.get('/info')
 def get_app_info(settings: Settings = Depends(get_settings)):
