@@ -5,6 +5,9 @@ from app.core.config import get_settings
 from datetime import datetime, UTC, timedelta
 from fastapi import HTTPException, status, Depends
 from app.models.user import User
+from sqlalchemy.orm import Session
+from app.repositories.user_repository import user_repository
+from app.core.database import get_db
 from fastapi.security import OAuth2PasswordBearer
 from app.core.exceptions import WeakPasswordException, InvalidCredentialsException, UserInactiveException
 from jose import jwt, JWTError
@@ -58,20 +61,24 @@ def decode_token(token: str):
             headers={"WWW-Authenticate": "Bearer"}
         )
 
+#TODO: Retornar o schema ou username?
 # Evoluir depois com DB = db: Session = Depends(get_db) e buscar o User pelo sub do payload — retornando o objeto completo ou 404.
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
     payload = decode_token(token)
-    username: str = payload.get("sub")
-    if username is None:
+    user_id: str = payload.get("sub")
+
+    user = user_repository.get_by_id(db, user_id)
+
+    if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials"
         )
     
-    if not username.is_active:
+    if not user.is_active:
         raise UserInactiveException()
     
-    return username # Por enquanto até retornar o schema
+    return user # Por enquanto até retornar o schema
 
 
 
