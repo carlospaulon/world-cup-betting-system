@@ -4,10 +4,9 @@ from app.schemas.auth import Token, LoginRequest
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.core.database import get_db
+from pydantic import SecretStr
 from app.services.auth_service import AuthService
 from app.services.user_service import UserService
-
-# Autenticao
 
 router = APIRouter(
     prefix="/auth",
@@ -32,7 +31,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     
     data = LoginRequest(
         email=form_data.username,
-        password=form_data.password
+        password=SecretStr(form_data.password)
     )
     
     auth_service = AuthService()

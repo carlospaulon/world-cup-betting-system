@@ -17,11 +17,9 @@ class UserService:
             )
         
         # Verificar cpf duplicado
-        duplicated_cpf = session.query(
-            session.query(User).filter_by(cpf=user_data.cpf).exists()
-        ).scalar()
+        existing_cpf = user_repository.get_by_cpf(session, user_data.cpf)
 
-        if duplicated_cpf:
+        if existing_cpf:
             raise UserAlreadyExistsException(
                 message="CPF já cadastrado",
                 status_code=status.HTTP_409_CONFLICT

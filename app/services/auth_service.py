@@ -4,10 +4,9 @@ from app.core.exceptions import InvalidCredentialsException, UserInactiveExcepti
 from app.repositories.user_repository import user_repository
 from app.core.security import verify_password, create_access_token
 
+#hardcoded...
 DUMMY_HASH = "$2b$12$4Z70bklJ1yRvrP1GPCMdbOVmO7EtyzHGoAQZLdqkD2UuK10GbQsBC"
 
-
-# Talvez dividir em 2 camadas user (register e change password) e auth (login)
 class AuthService:
     
     # aux method

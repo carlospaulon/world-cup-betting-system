@@ -1,4 +1,5 @@
 import re
+import uuid
 import bcrypt
 from typing import Annotated
 from app.core.config import get_settings
@@ -16,14 +17,10 @@ settings = get_settings()
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
 
-# Usar como parâmetro da função
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-# Aqui ou no schema como field validator
-# Trabalhar com plain password, hashpassword ou SecretStr
 def validate_password_strength(password: str) -> str:
-        """Verifica se a senha atende aos requisitos de complexidade."""
         # Tamanho da senha verificada na entidade/schema
         if not re.search(r"[A-Z]", password):
             raise WeakPasswordException("A senha deve conter pelo menos uma letra maiúscula.")
@@ -61,13 +58,12 @@ def decode_token(token: str):
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-#TODO: Retornar o schema ou username?
-# Evoluir depois com DB = db: Session = Depends(get_db) e buscar o User pelo sub do payload — retornando o objeto completo ou 404.
+
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
     payload = decode_token(token)
     user_id: str = payload.get("sub")
 
-    user = user_repository.get_by_id(db, user_id)
+    user = user_repository.get_by_id(db, uuid.UUID(user_id))
 
     if user is None:
         raise HTTPException(
@@ -84,6 +80,9 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session 
 
 def get_current_admin(current_user: User = Depends(get_current_user)):
     if not current_user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Admin access required"
+        )
     
     return current_user
