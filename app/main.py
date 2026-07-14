@@ -5,11 +5,9 @@ from .core.database import get_db
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from .core.exceptions import AppException
-from app.routers import auth
+from app.routers import auth, users
 
 app = FastAPI()
-
-# Separar a camada de exception handler em core e chamar no main o def handler.
 
 @app.exception_handler(AppException)
 def global_exception_handler(request: Request, exc: AppException):
@@ -23,6 +21,8 @@ def global_exception_handler(request: Request, exc: AppException):
     )
 
 app.include_router(auth.router)
+app.include_router(users.router)
+
 
 @app.get('/info')
 def get_app_info(settings: Settings = Depends(get_settings)):

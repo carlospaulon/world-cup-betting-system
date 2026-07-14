@@ -10,7 +10,7 @@ cpf_validator = CPF()
 class UserCreate(BaseModel):
     nickname: str = Field(min_length=3)
     email: EmailStr
-    cpf: str = Field(min_length=11, max_length=11) # usar o cpf validator do validate_docbr
+    cpf: str = Field(min_length=11, max_length=11)
     password: str = Field(min_length=8, max_length=255)
     date_of_birth: date
 
@@ -19,7 +19,7 @@ class UserCreate(BaseModel):
     @field_validator('cpf')
     @classmethod
     def check_cpf(cls, value: str):
-        clean_cpf = "".join(filter(str.isdigit, value)) # Limpando o cpf com caracteres
+        clean_cpf = "".join(filter(str.isdigit, value))
 
         if not cpf_validator.validate(clean_cpf):
             raise ValueError("CPF inválido")
@@ -53,7 +53,7 @@ class UserResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-
+# Usar SecretStr
 class UserUpdatePassword(BaseModel):
     current_password: str
     new_password: str
