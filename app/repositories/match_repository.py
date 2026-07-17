@@ -59,3 +59,5 @@ class MatchRepository(BaseRepository[Match]):
         session.commit()
 
         return self.get_by_id(session, match_id)
+
+match_repository = MatchRepository()
