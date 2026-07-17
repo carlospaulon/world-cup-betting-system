@@ -5,7 +5,7 @@ from .core.database import get_db
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from .core.exceptions import AppException
-from app.routers import auth, users
+from app.routers import auth, users, matches
 
 app = FastAPI()
 
@@ -22,6 +22,7 @@ def global_exception_handler(request: Request, exc: AppException):
 
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(matches.router)
 
 
 @app.get('/info')
