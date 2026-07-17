@@ -1,17 +1,18 @@
 from typing import List, Any, Optional
 from datetime import datetime
 from pydantic import BaseModel, field_validator, ConfigDict
+from app.models.enum.match_enum import MatchStatus, MatchResult
 
 class MatchApiData(BaseModel):
     api_match_id: str
     stage: Optional[str] = None
     match_date: Optional[datetime] = None
-    status: Optional[str] = None
+    status: Optional[MatchStatus] = None
     home_team: Optional[str] = None  # Permitir None para jogos futuros
     away_team: Optional[str] = None 
     home_score: Optional[int] = None
     away_score: Optional[int] = None
-    match_result: Optional[str] = None
+    match_result: Optional[MatchResult] = None
 
 class FootballApiResponse(BaseModel):
     matches: List[MatchApiData]
@@ -46,15 +47,14 @@ class MatchResponse(BaseModel):
     api_match_id: str
     stage: Optional[str] = None
     match_date: Optional[datetime] = None
-    status: Optional[str] = None # Enum
+    status: Optional[MatchStatus] = None # Enum
     home_team: Optional[str] = None
     away_team: Optional[str] = None
     home_score: Optional[int] = None
     away_score: Optional[int] = None
-    match_result: Optional[str] = None # Enum
+    match_result: Optional[MatchResult] = None # Enum
     odds_home: Optional[float] = None  # preenchido pelo service
-    odds_away: Optional[float] = None
+    odds_away: Optional[float] = None # Atualizado irt
     odds_draw: Optional[float] = None
-    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
