@@ -1,7 +1,7 @@
 from app.repositories.base_repository import BaseRepository
 from app.models.match import Match
-from app.models.enum.match_enum import MatchStatus
-from sqlalchemy import select
+from app.models.enum.match_enum import MatchStatus, MatchResult
+from sqlalchemy import select, or_, update
 from sqlalchemy.orm import Session
 
 class MatchRepository(BaseRepository[Match]):
@@ -25,3 +25,37 @@ class MatchRepository(BaseRepository[Match]):
         result = session.execute(query)
 
         return result.scalars().all()
+    
+    def get_by_team(self, session: Session, team_name: str) -> list[Match]:
+        query = select(self.model).where(
+            or_(
+            self.model.home_team.ilike(f'%{team_name}%'),
+            self.model.away_team.ilike(f'%{team_name}%')
+            ),
+            self.model.status == MatchStatus.FINISHED
+        )
+
+        result = session.execute(query)
+
+        return result.scalars().all()
+    
+    def update_result(
+            self, 
+            session: Session, 
+            match_id: int, 
+            home_score: int, 
+            away_score: int, 
+            match_result: MatchResult, 
+            status: MatchStatus) -> Match | None:
+        
+        query = update(self.model).where(self.model.id == match_id).values(
+            home_score=home_score,
+            away_score=away_score,
+            match_result=match_result,
+            status=status
+        )
+        
+        session.execute(query)
+        session.commit()
+
+        return self.get_by_id(session, match_id)
