@@ -10,8 +10,8 @@ Sistema de apostas para a Copa do Mundo 2026 desenvolvido como projeto final do 
 |---|---|---|
 | Fundação | Entidades, migrations, Docker, configurações | Concluído |
 | Autenticação | Registro, login JWT, troca de senha | Concluído |
-| Partidas | Importação via API externa, gestão admin | Em andamento |
-| Apostas | Criação, odds em tempo real, multiplicação | Pendente |
+| Partidas | Importação via API externa, gestão admin | Concluído |
+| Apostas | Criação, odds em tempo real, multiplicação | Em andamento |
 | Liquidação | Processamento de resultados e pontos | Pendente |
 | Exceções e docs | Handlers globais, docstrings, Swagger | Pendente |
 
