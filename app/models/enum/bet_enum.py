@@ -2,16 +2,16 @@ from enum import Enum
 
 # (str) transform the value of the Enum in str
 class BetPrediction(str, Enum):
-    HOME_WIN = "home_win"
-    AWAY_WIN = "away_win"
-    DRAW = "draw"
+    HOME_WIN = "HOME_WIN"
+    AWAY_WIN = "AWAY_WIN"
+    DRAW = "DRAW"
 
 class BetResult(str, Enum):
-    WON = "won"
-    LOST = "lost"
-    DRAW = "draw"
+    WON = "WON"
+    LOST = "LOST"
+    DRAW = "DRAW"
 
 class BetStatus(str, Enum):
-    PENDING = "pending"
-    SETTLED = "settled"
-    CANCELLED = "cancelled"
+    PENDING = "PENDING"
+    SETTLED = "SETTLED"
+    CANCELLED = "CANCELLED"

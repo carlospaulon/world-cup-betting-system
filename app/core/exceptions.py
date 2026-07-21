@@ -29,3 +29,10 @@ class WeakPasswordException(AppException):
     def __init__(self, message: str = 'Password does not meet security requirements', status_code: int = 422):
         super().__init__(message, status_code)
 
+class ServiceUnavailableException(AppException):
+    def __init__(self, message: str = 'Service Unavailable', status_code: int = 503):
+        super().__init__(message, status_code)
+
+class MatchNotFoundException(AppException):
+    def __init__(self, message: str = 'Match was not found', status_code: int = 404):
+        super().__init__(message, status_code)
