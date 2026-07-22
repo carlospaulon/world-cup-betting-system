@@ -41,7 +41,7 @@ class UserRepository(BaseRepository[User]):
     
     def update_points(self, session: Session, user_id, delta: int) -> User:
         query = update(self.model).where(self.model.id == user_id).values(points=self.model.points + delta) 
-        result = session.execute(query)
+        session.execute(query)
         session.commit()
 
         return self.get_by_id(session, user_id)
