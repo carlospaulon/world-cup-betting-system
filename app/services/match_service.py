@@ -88,3 +88,12 @@ class MatchService:
         # Chamar o settle bets - Depois
 
         return MatchResponse.model_validate(update_match)
+
+    def update_status(self, session: Session, match_id: int):
+        current_match = match_repository.get_by_id(session, match_id)
+                
+        if not current_match:
+            raise MatchNotFoundException()
+
+        update_match = match_repository.update_status(session, match_id)
+        return MatchResponse.model_validate(update_match)

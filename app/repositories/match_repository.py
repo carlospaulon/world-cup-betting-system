@@ -60,4 +60,14 @@ class MatchRepository(BaseRepository[Match]):
 
         return self.get_by_id(session, match_id)
 
+    def update_status(self, session: Session, match_id: int):
+        query = update(self.model).where(self.model.id == match_id).values(
+            status = MatchStatus.TIMED
+        )
+
+        session.execute(query)
+        session.commit()
+        return self.get_by_id(session, match_id)
+
+
 match_repository = MatchRepository()

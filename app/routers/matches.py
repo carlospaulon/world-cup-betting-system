@@ -62,3 +62,11 @@ def finish_match(id: int, current_admin: User = Depends(get_current_admin), db: 
 
 
     return match_service.finish_match(db, id)
+
+@router.patch(
+    "/admin/matches/{match_id}/status"
+)
+def update_status(match_id: int, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    match_service = MatchService()
+
+    return match_service.update_status(db, match_id)
