@@ -1,3 +1,5 @@
+import uuid
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.models.bet import Bet
@@ -5,7 +7,7 @@ from app.models.enum.bet_enum import BetPrediction, BetStatus
 from app.schemas.bet import BetCreate
 from app.repositories.bet_repository import bet_repository
 from app.repositories.match_repository import match_repository
-from app.core.exceptions import MatchNotFoundException, MatchNotOpenException, InsufficientPointsException
+from app.core.exceptions import MatchNotFoundException, MatchNotOpenException, InsufficientPointsException, BetNotFoundException, BetAlreadySettledException
 from app.models.enum.match_enum import MatchStatus
 from app.repositories.user_repository import user_repository
 
@@ -64,4 +66,32 @@ class BetService:
         )
 
         return bet_repository.create(session, bet)
+        
+
+    def multiply_bet(self, session: Session, user: User, bet_id: uuid.UUID, factor: int):
+        current_bet = bet_repository.get_by_id(session, bet_id)
+
+        if not current_bet:
+            raise BetNotFoundException()
+
+        if not current_bet.user_id == user.id:
+            raise HTTPException(status_code=403, detail="Bet doesnt belong to the user")
+
+        if not current_bet.status == BetStatus.PENDING:
+            raise BetAlreadySettledException()
+
+        additional_cost = current_bet.points_bet * (factor - 1)
+
+        if not user.points >= additional_cost:
+            raise InsufficientPointsException()
+
+        # user desconto pontos
+        user_repository.update_points(session, user.id, -additional_cost)
+
+        # bet atualiza pontos apostados
+        return bet_repository.update_bet_points(session, bet_id, current_bet.points_bet * factor)
+
+        
+
+
         

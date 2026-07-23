@@ -57,6 +57,16 @@ class BetRepository(BaseRepository[Bet]):
 
         return self.get_by_id(session, bet_id)
 
+    def update_bet_points(self, session: Session, bet_id: uuid.UUID, points_bet: int):
+        query = update(self.model).where(self.model.id == bet_id).values(
+            points_bet=points_bet
+        )
+
+        session.execute(query)
+        session.commit()
+
+        return self.get_by_id(session, bet_id)
+
     def get_user_wins(self, session: Session, user_id: uuid.UUID) -> int:
         query = select(func.count()).where(and_(
             self.model.user_id == user_id,
