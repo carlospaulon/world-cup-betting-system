@@ -21,7 +21,7 @@ class BetResponse(BaseModel):
     created_at: datetime
 
 class BetMultiply(BaseModel):
-    factor: int = Field(ge=2) # Multiplicador
+    factor: int = Field(ge=2, le=5) # Multiplicador
 
 class BetWithMatchResponse(BetResponse):
     home_team: str
