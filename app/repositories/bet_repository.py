@@ -21,6 +21,12 @@ class BetRepository(BaseRepository[Bet]):
 
         return result.scalars().all()
 
+    def get_bets_for_match(self, session: Session, match_id: int) -> list[Bet]:
+        query = select(self.model).where(self.model.match_id == match_id)
+        result = session.execute(query)
+    
+        return result.scalars().all()
+
     def get_pending_by_match(self, session: Session, match_id: int) -> list[Bet]:
         query = select(self.model).where(and_(
             self.model.match_id == match_id,

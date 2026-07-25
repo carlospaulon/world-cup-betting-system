@@ -5,7 +5,9 @@ from app.models import User
 from app.core.security import get_current_user
 from app.core.database import get_db
 from app.repositories.user_repository import user_repository
+from app.repositories.bet_repository import bet_repository
 from app.services.user_service import UserService
+from app.core.security import get_current_admin
 
 router = APIRouter(
     prefix="/users",
@@ -46,3 +48,15 @@ def get_points(current_user: User = Depends(get_current_user), db: Session = Dep
 )
 def get_ranking(db: Session = Depends(get_db)):
     return user_repository.get_ranking(db)
+
+@router.get(
+    "/admin/users" # ajustar rota
+)
+def get_users_status(current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return user_repository.get_users_actives(db)
+
+@router.get(
+    "/admin/users/{cpf}"
+)
+def get_users_by_cpf(cpf: str, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return user_repository.get_by_cpf(db, cpf) # tratar no service

@@ -32,6 +32,12 @@ class UserRepository(BaseRepository[User]):
         result = session.execute(query)
 
         return result.scalars().all()
+
+    def get_users_actives(self, session: Session) -> list[User]:
+        query = select(self.model).where(self.model.is_active == True)
+        result = session.execute(query)
+
+        return result.scalars().all()
     
     def get_points(self, session: Session, cpf: str) -> User | None:
         query = select(self.model.points).where(self.model.cpf == cpf)
@@ -77,7 +83,7 @@ class UserRepository(BaseRepository[User]):
 
         result = session.execute(query)
 
-        return result.all()
+        return result.mappings().all()
 
 
 user_repository = UserRepository()
