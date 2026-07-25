@@ -2,8 +2,8 @@ from enum import Enum
 
 # (str) transform the value of the Enum in str
 class BetPrediction(str, Enum):
-    HOME_WIN = "HOME_WIN"
-    AWAY_WIN = "AWAY_WIN"
+    HOME_WIN = "HOME_TEAM"
+    AWAY_WIN = "AWAY_TEAM"
     DRAW = "DRAW"
 
 class BetResult(str, Enum):

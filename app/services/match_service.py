@@ -5,6 +5,7 @@ from app.services.football_api_service import FootballService
 from app.schemas.match import FootballApiResponse, MatchResponse, MatchApiData
 from app.models.enum.match_enum import MatchResult, MatchStatus
 from app.core.exceptions import MatchNotFoundException
+from app.services.bet_service import BetService
 
 class MatchService:
     def import_matches(self, session: Session):
@@ -85,8 +86,10 @@ class MatchService:
             mapped_match.status
         )
 
-        # Chamar o settle bets - Depois
+        bet_service = BetService()
 
+        bet_service.settle_bets(session, update_match)
+        
         return MatchResponse.model_validate(update_match)
 
     def update_status(self, session: Session, match_id: int):
