@@ -64,9 +64,9 @@ class MatchService:
         # Mudar tipo para none
         transformed = {
             "api_match_id": str(response.get("id")),
-            'stage': response.get('stage') or {},
-            'match_date': response.get('utcDate') or {},
-            'status': response.get('status') or {},
+            'stage': response.get('stage'),
+            'match_date': response.get('utcDate'),
+            'status': response.get('status'),
             "home_team": (response.get("homeTeam") or {}).get('name'), 
             "away_team": (response.get("awayTeam") or {}).get('name'), 
             "home_score": full_time.get("home"), 
@@ -83,7 +83,7 @@ class MatchService:
             mapped_match.home_score, 
             mapped_match.away_score, 
             mapped_match.match_result, 
-            mapped_match.status
+            MatchStatus.FINISHED
         )
 
         bet_service = BetService()

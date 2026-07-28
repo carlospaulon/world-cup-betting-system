@@ -43,7 +43,7 @@ class BetRepository(BaseRepository[Bet]):
         ))
         result = session.execute(query)
 
-        return result.scalar()
+        return result.scalar() or 0
 
     def update_result(
             self, 
