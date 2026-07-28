@@ -5,7 +5,7 @@ from app.models.user import User
 from app.models.match import Match
 from app.models.bet import Bet
 from app.models.enum.bet_enum import BetPrediction, BetStatus, BetResult
-from app.schemas.bet import BetCreate, BetWithMatchResponse
+from app.schemas.bet import BetCreate, BetWithMatchResponse, BetResponse
 from app.repositories.bet_repository import bet_repository
 from app.repositories.match_repository import match_repository
 from app.core.exceptions import MatchNotFoundException, MatchNotOpenException, InsufficientPointsException, BetNotFoundException, BetAlreadySettledException
@@ -15,28 +15,19 @@ from app.repositories.user_repository import user_repository
 class BetService:
     def get_user_bets(self, session: Session, user: User):
         bets = bet_repository.get_by_user(session, user.id)
-        responses = []
+        result = []
 
         for bet in bets:
             match = match_repository.get_by_id(session, bet.match_id)
 
-            response = BetWithMatchResponse(
-                id=bet.id,
-                user_id=bet.user_id,
-                match_id=bet.match_id,
-                prediction=bet.prediction,
-                points_bet=bet.points_bet,
-                odds=bet.odds,
-                result=bet.result,
-                status=bet.status,
-                created_at=bet.created_at,
-                home_team=match.home_team,
-                away_team=match.away_team
-            )
+            # valida e atribui os campo com o parametro
+            response = BetWithMatchResponse.model_validate(bet)
+            response.home_team = match.home_team
+            response.away_team = match.away_team
 
-            responses.append(response)
+            result.append(response)
 
-        return responses
+        return result
 
     def get_bet_by_id(self, session: Session, bet_id: uuid.UUID, user: User) -> BetWithMatchResponse:
         bet = bet_repository.get_by_id(session, bet_id)
@@ -44,24 +35,16 @@ class BetService:
         if not bet:
             raise BetNotFoundException()
 
+        # Validar se bet pertence a user
+
         if bet.user_id != user.id:
             raise HTTPException(status_code=403, detail="Bet doesnt belong to the user")
 
         match = match_repository.get_by_id(session, bet.match_id)
 
-        response = BetWithMatchResponse(
-            id=bet.id,
-            user_id=bet.user_id,
-            match_id=bet.match_id,
-            prediction=bet.prediction,
-            points_bet=bet.points_bet,
-            odds=bet.odds,
-            result=bet.result,
-            status=bet.status,
-            created_at=bet.created_at,
-            home_team=match.home_team,
-            away_team=match.away_team
-        )
+        response = BetWithMatchResponse.model_validate(bet)
+        response.home_team = match.home_team
+        response.away_team = match.away_team
 
         return response
 
@@ -120,7 +103,7 @@ class BetService:
             status = BetStatus.PENDING
         )
 
-        return bet_repository.create(session, bet)
+        return BetResponse.model_validate(bet_repository.create(session, bet))
         
 
     def multiply_bet(self, session: Session, user: User, bet_id: uuid.UUID, factor: int):
@@ -129,22 +112,24 @@ class BetService:
         if not current_bet:
             raise BetNotFoundException()
 
-        if not current_bet.user_id == user.id:
+        if current_bet.user_id != user.id:
             raise HTTPException(status_code=403, detail="Bet doesnt belong to the user")
 
-        if not current_bet.status == BetStatus.PENDING:
+        if current_bet.status != BetStatus.PENDING:
             raise BetAlreadySettledException()
 
         additional_cost = current_bet.points_bet * (factor - 1)
 
-        if not user.points >= additional_cost:
+        if user.points < additional_cost:
             raise InsufficientPointsException()
 
         # user desconto pontos
         user_repository.update_points(session, user.id, -additional_cost)
 
         # bet atualiza pontos apostados
-        return bet_repository.update_bet_points(session, bet_id, current_bet.points_bet * factor)
+        new_points = current_bet.points_bet * factor
+        # model validate?
+        return bet_repository.update_bet_points(session, bet_id, new_points)
 
     def settle_bets(self, session: Session, match: Match):
         bets = bet_repository.get_pending_by_match(session, match.id)
