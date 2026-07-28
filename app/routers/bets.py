@@ -32,12 +32,6 @@ def create_bet(bet: BetCreate, current_user: User = Depends(get_current_user), d
 def get_bets(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return bet_service.get_user_bets(db, current_user)
 
-@router.get(
-    "/bets/ranking"
-)
-def get_all_won_bets(db: Session = Depends(get_db)):
-    user_repository = UserRepository()
-    return user_repository.get_ranking(db)
 
 @router.get(
     "/bets/{bet_id}",

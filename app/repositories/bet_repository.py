@@ -37,7 +37,7 @@ class BetRepository(BaseRepository[Bet]):
         return result.scalars().all()
 
     def count_by_prediction(self, session: Session, match_id: int, prediction: BetPrediction) -> int:
-        query = select(func.count()).where(and_(
+        query = select(func.count(self.model.id)).where(and_(
             self.model.match_id == match_id,
             self.model.prediction == prediction
         ))
