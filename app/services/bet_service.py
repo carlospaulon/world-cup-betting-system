@@ -21,9 +21,19 @@ class BetService:
             match = match_repository.get_by_id(session, bet.match_id)
 
             # valida e atribui os campo com o parametro
-            response = BetWithMatchResponse.model_validate(bet)
-            response.home_team = match.home_team
-            response.away_team = match.away_team
+            response = BetWithMatchResponse(
+                id=bet.id,
+                user_id=bet.user_id,
+                match_id=bet.match_id,
+                prediction=bet.prediction,
+                points_bet=bet.points_bet,
+                odds=bet.odds,
+                result=bet.result,
+                status=bet.status,
+                created_at=bet.created_at,
+                home_team=match.home_team,
+                away_team=match.away_team
+            )
 
             result.append(response)
 
@@ -42,9 +52,19 @@ class BetService:
 
         match = match_repository.get_by_id(session, bet.match_id)
 
-        response = BetWithMatchResponse.model_validate(bet)
-        response.home_team = match.home_team
-        response.away_team = match.away_team
+        response = BetWithMatchResponse(
+            id=bet.id,
+            user_id=bet.user_id,
+            match_id=bet.match_id,
+            prediction=bet.prediction,
+            points_bet=bet.points_bet,
+            odds=bet.odds,
+            result=bet.result,
+            status=bet.status,
+            created_at=bet.created_at,
+            home_team=match.home_team,
+            away_team=match.away_team
+        )
 
         return response
 
@@ -56,26 +76,11 @@ class BetService:
         away_count = bet_repository.count_by_prediction(session, match_id, BetPrediction.AWAY_WIN)
 
         if prediction == BetPrediction.HOME_WIN:
-            my_count = home_count
-            opponent_count = away_count
-
-        if prediction == BetPrediction.AWAY_WIN:
-            my_count = away_count
-            opponent_count = home_count
-
-        if prediction == BetPrediction.DRAW:
+            return round(1 + (away_count / home_count if home_count > 0 else 0), 2)
+        elif prediction == BetPrediction.AWAY_WIN:
+            return round(1 + (home_count / away_count if away_count > 0 else 0), 2)
+        else:  # DRAW
             return 1.0
-
-        if my_count == 0 and opponent_count == 0:
-            return 1.0
-
-        if opponent_count == 0:
-            return 1.0
-
-        if my_count == 0:
-            return 1.0
-
-        return 1 + (opponent_count / my_count)
 
         
     def create_bet(self, session: Session, user: User, data: BetCreate) -> Bet:
@@ -135,20 +140,23 @@ class BetService:
         bets = bet_repository.get_pending_by_match(session, match.id)
 
         for bet in bets:
-            if bet.prediction.value == match.match_result.value:
-                poinst_earned = round(bet.points_bet * bet.odds, 2)
-
-                user_repository.update_points(session, bet.user_id, poinst_earned)
-
-                result = (BetResult.DRAW if match.match_result == MatchResult.DRAW else BetResult.WON)
-                
-                bet_repository.update_result(session, bet.id, result, BetStatus.SETTLED)
-            
-            else:
-                bet_repository.update_result(session, bet.id, BetResult.LOST, BetStatus.SETTLED)
-
-                
             user = user_repository.get_by_id(session, bet.user_id)
+
+            if bet.prediction == match.match_result:
+                bet.result = BetResult.WON
+                poinst_earned = round(bet.points_bet * bet.odds, 2)
+                user_repository.update_points(session, user.id, poinst_earned)
+
+            elif bet.prediction == MatchResult.DRAW:
+                bet.result = BetResult.DRAW
+                user_repository.update_points(session, user.id, bet.points_bet)
+
+            else:
+                bet.result = BetResult.LOST
+
+            bet.status = BetStatus.SETTLED
+            bet_repository.update_result(session, bet.id, bet.result, bet.status)
+
             if user.points <= 0:
                 user_repository.deactivate(session, user.id)
 
