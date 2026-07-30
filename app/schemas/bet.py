@@ -23,7 +23,7 @@ class BetResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class BetMultiply(BaseModel):
-    factor: int = Field(ge=2, le=5) # Multiplicador
+    factor: int = Field(ge=2) # Multiplicador
 
 class BetWithMatchResponse(BetResponse):
     home_team: str

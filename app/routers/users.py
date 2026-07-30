@@ -56,7 +56,16 @@ def get_users_status(current_admin: User = Depends(get_current_admin), db: Sessi
     return user_repository.get_users_actives(db)
 
 @router.get(
+    "/admin/users/all"
+)
+def get_all_users(current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    users = user_repository.get_all(db)
+    print(users)
+    return users
+
+@router.get(
     "/admin/users/{cpf}"
 )
 def get_users_by_cpf(cpf: str, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     return user_repository.get_by_cpf(db, cpf) # tratar no service
+
