@@ -5,6 +5,7 @@ from app.services.football_api_service import FootballService
 from app.schemas.match import FootballApiResponse, MatchResponse, MatchApiData
 from app.models.enum.match_enum import MatchResult, MatchStatus
 from app.core.exceptions import MatchNotFoundException
+from app.services.bet_service import BetService
 
 class MatchService:
     def import_matches(self, session: Session):
@@ -63,9 +64,9 @@ class MatchService:
         # Mudar tipo para none
         transformed = {
             "api_match_id": str(response.get("id")),
-            'stage': response.get('stage') or {},
-            'match_date': response.get('utcDate') or {},
-            'status': response.get('status') or {},
+            'stage': response.get('stage'),
+            'match_date': response.get('utcDate'),
+            'status': response.get('status'),
             "home_team": (response.get("homeTeam") or {}).get('name'), 
             "away_team": (response.get("awayTeam") or {}).get('name'), 
             "home_score": full_time.get("home"), 
@@ -82,9 +83,20 @@ class MatchService:
             mapped_match.home_score, 
             mapped_match.away_score, 
             mapped_match.match_result, 
-            mapped_match.status
+            MatchStatus.FINISHED
         )
 
-        # Chamar o settle bets - Depois
+        bet_service = BetService()
 
+        bet_service.settle_bets(session, update_match)
+        
+        return MatchResponse.model_validate(update_match)
+
+    def update_status(self, session: Session, match_id: int):
+        current_match = match_repository.get_by_id(session, match_id)
+                
+        if not current_match:
+            raise MatchNotFoundException()
+
+        update_match = match_repository.update_status(session, match_id)
         return MatchResponse.model_validate(update_match)
