@@ -11,9 +11,9 @@ Sistema de apostas para a Copa do Mundo 2026 desenvolvido como projeto final do 
 | Fundação | Entidades, migrations, Docker, configurações | Concluído |
 | Autenticação | Registro, login JWT, troca de senha | Concluído |
 | Partidas | Importação via API externa, gestão admin | Concluído |
-| Apostas | Criação, odds em tempo real, multiplicação | Em andamento |
-| Liquidação | Processamento de resultados e pontos | Pendente |
-| Exceções e docs | Handlers globais, docstrings, Swagger | Pendente |
+| Apostas | Criação, odds em tempo real, multiplicação | Concluído |
+| Liquidação | Processamento de resultados e pontos | Testes |
+| Exceções e docs | Handlers globais, docstrings, Swagger | Em andamento |
 
 ## Arquitetura
 
@@ -52,7 +52,7 @@ Acesse a documentação em `http://localhost:8000/docs`
 ## Próximos Passos
 
 - [X] Autenticação JWT e registro com validação de idade
-- [ ] Integração com API football-data.org
-- [ ] Sistema de apostas com odds em tempo real
+- [X] Integração com API football-data.org
+- [X] Sistema de apostas com odds em tempo real
 - [ ] Liquidação automática de apostas ao finalizar partida
 - [ ] Exceções personalizadas e handlers globais
