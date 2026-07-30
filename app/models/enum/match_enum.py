@@ -1,12 +1,12 @@
 from enum import Enum
 
 class MatchResult(str, Enum):
-    HOME_TEAM = "home_team"
-    AWAY_TEAM = "away_team"
-    DRAW = "draw"
+    HOME_TEAM = "HOME_TEAM"
+    AWAY_TEAM = "AWAY_TEAM"
+    DRAW = "DRAW"
 
 class MatchStatus(str, Enum):
-    TIMED = "timed"
-    IN_PLAY = "in_play"
-    FINISHED = "finished"
-    POSTPONED = "postponed"
+    TIMED = "TIMED"
+    IN_PLAY = "IN_PLAY"
+    FINISHED = "FINISHED"
+    POSTPONED = "POSTPONED"

@@ -29,3 +29,26 @@ class WeakPasswordException(AppException):
     def __init__(self, message: str = 'Password does not meet security requirements', status_code: int = 422):
         super().__init__(message, status_code)
 
+class ServiceUnavailableException(AppException):
+    def __init__(self, message: str = 'Service Unavailable', status_code: int = 503):
+        super().__init__(message, status_code)
+
+class MatchNotFoundException(AppException):
+    def __init__(self, message: str = 'Match was not found', status_code: int = 404):
+        super().__init__(message, status_code)
+
+class BetNotFoundException(AppException):
+    def __init__(self, message: str = 'Bet was not found', status_code: int = 404):
+        super().__init__(message, status_code)
+
+class MatchNotOpenException(AppException):
+    def __init__(self, message: str = 'Match is not open for betting', status_code: int = 409):
+        super().__init__(message, status_code)
+
+class InsufficientPointsException(AppException):
+    def __init__(self, message: str = 'Insufficient points for this bet', status_code: int = 409):
+        super().__init__(message, status_code)
+
+class BetAlreadySettledException(AppException):
+    def __init__(self, message: str = 'Bet already settled', status_code: int = 409):
+        super().__init__(message, status_code)
