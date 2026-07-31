@@ -54,5 +54,5 @@ Acesse a documentação em `http://localhost:8000/docs`
 - [X] Autenticação JWT e registro com validação de idade
 - [X] Integração com API football-data.org
 - [X] Sistema de apostas com odds em tempo real
-- [ ] Liquidação automática de apostas ao finalizar partida
+- [X] Liquidação automática de apostas ao finalizar partida
 - [ ] Exceções personalizadas e handlers globais
