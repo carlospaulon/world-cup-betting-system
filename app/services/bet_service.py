@@ -1,5 +1,6 @@
 import uuid
 from fastapi import HTTPException
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.models.match import Match
@@ -13,8 +14,12 @@ from app.models.enum.match_enum import MatchStatus, MatchResult
 from app.repositories.user_repository import user_repository
 
 class BetService:
-    def get_user_bets(self, session: Session, user: User):
-        bets = bet_repository.get_by_user(session, user.id)
+    def get_user_bets(self, session: Session, user: User, bet_status: Optional[BetStatus]):
+        if bet_status is None:
+            bets = bet_repository.get_by_user(session, user.id)
+        else:
+            bets = bet_repository.filter_bets(session, user.id, bet_status)
+
         result = []
 
         for bet in bets:
@@ -142,7 +147,7 @@ class BetService:
         for bet in bets:
             user = user_repository.get_by_id(session, bet.user_id)
 
-            if bet.prediction == match.match_result:
+            if bet.prediction == MatchResult.WON:
                 bet.result = BetResult.WON
                 poinst_earned = round(bet.points_bet * bet.odds, 2)
                 user_repository.update_points(session, user.id, poinst_earned)
