@@ -8,6 +8,19 @@ from app.core.security import hash_password, verify_password, validate_password_
 
 class UserService:
     def register_user(self, session: Session, user_data: UserCreate) -> UserResponse:
+        """Register a new user.
+
+        Args:
+            session (Session): Database session.
+            user_data (UserCreate): User registration data.
+
+        Raises:
+            UserAlreadyExistsException: Raised when the email or CPF already exists.
+
+        Returns:
+            UserResponse: Registered user information.
+        """
+
         existing_user = user_repository.get_by_email(session, user_data.email)
 
         if existing_user:

@@ -23,6 +23,20 @@ class AuthService:
         return user
         
     def login(self, session: Session, data: LoginRequest) -> Token:
+        """Authenticate a registered user
+
+        Args:
+            session (Session): current db connection
+            data (LoginRequest): schema to request the login
+
+        Raises:
+            InvalidCredentialsException: Some information is wrong
+            UserInactiveException: User is not active on the system
+
+        Returns:
+            Token: Generated JWT access token
+        """
+
         user = self.authenticate_user(session, data)
 
         if not user:

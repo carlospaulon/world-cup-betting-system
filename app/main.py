@@ -7,7 +7,21 @@ from sqlalchemy.orm import Session
 from .core.exceptions import AppException
 from app.routers import auth, users, matches, bets
 
-app = FastAPI()
+app = FastAPI(
+    title="World Cup Betting System",
+    description="Worldcup Betting System using FastAPI, PostgreSQL, and Docker",
+    version="1.0.0",
+    contact={
+        "name": "Carlos Paulon",
+        "url": "https://www.linkedin.com/in/carlospaulon/",
+        "email": "paulonluis222@gmail.com",
+    },
+    license_info={
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT",
+    },
+)
+
 
 @app.exception_handler(AppException)
 def global_exception_handler(request: Request, exc: AppException):
