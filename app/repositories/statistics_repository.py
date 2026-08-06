@@ -1,9 +1,11 @@
+import uuid
 from app.repositories.base_repository import BaseRepository
 from sqlalchemy.orm import Session
 from app.models.match import Match
+from app.models.user import User
 from app.models.bet import Bet
-from app.schemas.bet import BetPrediction
-from sqlalchemy import select, func
+from app.schemas.bet import BetPrediction, BetResult, BetStatus
+from sqlalchemy import select, func, case
 
 class StatisticsRepository():
 
@@ -13,6 +15,7 @@ class StatisticsRepository():
             Match.id.label("match_id"),
             Match.home_team,
             Match.away_team,
+            Match.status,
             func.count(Bet.id).label("total_bets"),
             func.count(Bet.id)
                 .filter(Bet.prediction == BetPrediction.HOME_WIN)
@@ -36,5 +39,82 @@ class StatisticsRepository():
 
         result = session.execute(query)
         return result.mappings().first() # retorna um dict
+
+    # checar performance!
+    def get_user_stats(self, session: Session, user_id: uuid):
+        # stats geral
+        query_general = (select(
+            User.id.label("user_id"),
+            User.nickname,
+            User.points.label("current_points"),
+            func.count(Bet.id)
+                .label("total_bets"),
+            func.count(Bet.id)
+                .filter(Bet.status == BetStatus.PENDING)
+                .label("pending_bets"),
+            func.count(Bet.id)
+                .filter(Bet.result == BetResult.WON)
+                .label("won_bets"),
+            func.count(Bet.id)
+                .filter(Bet.result == BetResult.LOST)
+                .label("lost_bets"),
+            func.count(Bet.id)
+                .filter(Bet.result == BetResult.DRAW)
+                .label("draw_bets"),
+            func.coalesce(func.sum(Bet.points_bet), 0) # permite valor 0
+                .label("points_invested"),
+            )
+            .join(Bet, Bet.user_id == User.id, isouter=True)
+            .where(User.id == user_id)
+            .group_by(
+                User.id,
+                User.nickname,
+                User.points
+            )
+        )
+
+        # predict favorita
+        query_favorite_prediction = (select(
+            Bet.prediction,
+            func.count(Bet.id).label("total")
+        )
+        .where(Bet.user_id == user_id)
+        .group_by(Bet.prediction)
+        .order_by(func.count(Bet.id).desc())
+        .limit(1)
+    )
+        
+        # time favorito
+        # when then
+        team = case(
+            (Bet.prediction == BetPrediction.HOME_WIN, Match.home_team),
+            (Bet.prediction == BetPrediction.AWAY_WIN, Match.away_team),
+            else_=None
+        )
+
+        query_favorite_team = (
+            select(
+                team.label("favorite_team"),
+                func.count(Bet.id)
+            )
+            .join(Match, Match.id == Bet.match_id)
+            .where(Bet.user_id == user_id)
+            .where(Bet.prediction != BetPrediction.DRAW)
+            .group_by(team)
+            .order_by(func.count(Bet.id).desc())
+            .limit(1)
+        )
+
+        # executo as 3 queries
+        general_stats = session.execute(query_general).mappings().first()
+        favorite_prediction = session.execute(query_favorite_prediction).scalar()
+        favorite_team = session.execute(query_favorite_team).scalar()
+
+        # monto o retorno como dicionário
+        data = dict(general_stats)
+        data["favorite_prediction"] = favorite_prediction
+        data["favorite_team"] = favorite_team
+
+        return data
 
 statistics_repository = StatisticsRepository()
