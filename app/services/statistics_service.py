@@ -1,9 +1,10 @@
+import uuid
 from sqlalchemy.orm import Session
 from app.repositories.match_repository import match_repository
 from app.repositories.statistics_repository import statistics_repository
 from app.services.bet_service import BetService
 from app.core.exceptions import MatchNotFoundException
-from app.schemas.statistics import MatchStats
+from app.schemas.statistics import MatchStats, UserStats
 from app.models.enum.bet_enum import BetPrediction
 
 bet_service = BetService()
@@ -30,3 +31,10 @@ class StatisticsService:
         match_stats = MatchStats.model_validate(stats_data)
 
         return match_stats
+
+    def get_user_stats(self, session: Session, user_id: uuid.UUID):
+        stats = statistics_repository.get_user_stats(session, user_id)
+
+        user_stats = UserStats.model_validate(stats)
+
+        return user_stats

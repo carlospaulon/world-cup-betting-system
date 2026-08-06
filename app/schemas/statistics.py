@@ -1,5 +1,6 @@
 import uuid
 from app.models.enum.bet_enum import BetPrediction
+from app.models.enum.match_enum import MatchStatus
 from pydantic import BaseModel, computed_field
 
 # admin
@@ -7,6 +8,7 @@ class MatchStats(BaseModel):
     match_id: int
     home_team: str
     away_team: str
+    status: MatchStatus
     total_bets: int
 
     bets_home_win: int
@@ -23,6 +25,7 @@ class UserStats(BaseModel):
     nickname: str
 
     total_bets: int
+    pending_bets: int
     won_bets: int
     lost_bets: int
     draw_bets: int
