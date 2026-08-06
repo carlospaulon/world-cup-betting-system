@@ -41,12 +41,39 @@ Sistema de apostas para a Copa do Mundo 2026 desenvolvido como projeto final do 
 
 ## Como rodar
 
+1. Crie e ative o ambiente virtual.
+
+2. Instale as dependências:
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Inicie o banco de dados (Postgres):
+
 ```bash
 docker compose up -d
+```
+
+4. Execute a migration:
+
+```bash
+alembic upgrade head
+```
+
+> Execute este comando na primeira execução e sempre que houver novas migrations.
+
+5. Inicie a aplicação:
+
+```bash
 uvicorn app.main:app --reload
 ```
 
-Acesse a documentação em `http://localhost:8000/docs`
+6. Acesse a documentação da API via Swagger:
+
+```
+http://localhost:8000/docs
+```
 
 
 ## Próximos Passos
