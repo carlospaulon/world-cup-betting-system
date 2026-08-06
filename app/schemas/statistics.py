@@ -1,6 +1,8 @@
 import uuid
-from pydantic import BaseModel
+from app.models.enum.bet_enum import BetPrediction
+from pydantic import BaseModel, computed_field
 
+# admin
 class MatchStats(BaseModel):
     match_id: int
     home_team: str
@@ -8,26 +10,37 @@ class MatchStats(BaseModel):
     total_bets: int
 
     bets_home_win: int
-    bets_away_win: int
+    bets_away_win: int 
     bets_draw: int
 
     odds_home: float
     odds_away: float
     odds_draw: float
 
+# user
 class UserStats(BaseModel):
     user_id: uuid.UUID
     nickname: str
+
     total_bets: int
     won_bets: int
     lost_bets: int
     draw_bets: int
-    win_rate: float
+
+    @computed_field
+    @property
+    def win_rate(self) -> float: 
+        if self.total_bets == 0:
+            return 0.0
+
+        return (self.won_bets / self.total_bets) * 100
+
     current_points: int
     points_invested: int
-    favorite_prediction: str
-    favorite_team: str
+    favorite_prediction: BetPrediction | None
+    favorite_team: str | None # mais apostou
 
+# admin
 class SystemStats(BaseModel):
     total_users: int
     active_users: int
@@ -37,6 +50,7 @@ class SystemStats(BaseModel):
     matches_open: int
     matches_finished: int
 
+# publica
 class TeamStats(BaseModel):
     team: str
     matches: int
@@ -45,5 +59,17 @@ class TeamStats(BaseModel):
     losses: int
     goals_scored: int
     goals_conceded: int
-    goal_difference: int
-    win_rate: float
+
+    @computed_field
+    @property
+    def goal_difference(self) -> int:
+        return self.goals_scored - self.goals_conceded
+    
+
+    @computed_field
+    @property
+    def win_rate(self)-> float:
+        if self.matches == 0:
+            return 0.0
+
+        return (self.wins / self.matches) * 100
