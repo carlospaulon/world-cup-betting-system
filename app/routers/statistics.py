@@ -27,3 +27,10 @@ def get_matches_statistics(match_id: int, current_admin: User = Depends(get_curr
 )
 def get_user_statistics(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return statistics_service.get_user_stats(db, current_user.id)
+
+@router.get(
+    "/admin/system",
+    status_code=status.HTTP_200_OK
+)
+def get_system_statistics(current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return statistics_service.get_system_stats(db)

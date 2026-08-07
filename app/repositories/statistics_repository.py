@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.models.match import Match
 from app.models.user import User
 from app.models.bet import Bet
+from app.schemas.match import MatchStatus
 from app.schemas.bet import BetPrediction, BetResult, BetStatus
 from sqlalchemy import select, func, case
 
@@ -116,5 +117,31 @@ class StatisticsRepository():
         data["favorite_team"] = favorite_team
 
         return data
+
+    def get_system_stats(self, session: Session):
+        # cada campo com count ou sum como subquery
+        total_users = select(func.count(User.id)).scalar_subquery()
+        active_users = (select(func.count(User.id))
+            .where(User.is_active.is_(True))
+            .scalar_subquery())
+        total_bets = select(func.count(Bet.id)).scalar_subquery()
+        total_points = select(func.coalesce(func.sum(User.points), 0)).scalar_subquery()
+        total_matches = select(func.count(Match.id)).scalar_subquery()
+        matches_open = select(func.count(Match.id)).where(Match.status == MatchStatus.TIMED).scalar_subquery()
+        matches_finished = select(func.count(Match.id)).where(Match.status == MatchStatus.FINISHED).scalar_subquery()
+
+        # monto a minha query principal
+        query = select(
+            total_users.label("total_users"),
+            active_users.label("active_users"),
+            total_bets.label("total_bets"),
+            total_points.label("total_points_in_system"),
+            total_matches.label("total_matches"),
+            matches_open.label("matches_open"),
+            matches_finished.label("matches_finished"),
+        )
+
+        result = session.execute(query)
+        return result.mappings().first()
 
 statistics_repository = StatisticsRepository()
