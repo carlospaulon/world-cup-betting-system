@@ -6,7 +6,7 @@ from app.models.user import User
 from app.models.bet import Bet
 from app.schemas.match import MatchStatus
 from app.schemas.bet import BetPrediction, BetResult, BetStatus
-from sqlalchemy import select, func, case
+from sqlalchemy import select, func, case, or_, and_
 
 class StatisticsRepository():
 
@@ -143,5 +143,83 @@ class StatisticsRepository():
 
         result = session.execute(query)
         return result.mappings().first()
+
+    def get_team_stats(self, session: Session, team_name: str):
+
+        team_filter = or_(
+            Match.home_team.ilike(f'%{team_name}%'),
+            Match.away_team.ilike(f'%{team_name}%')
+        )
+            
+
+        goals_scored = case(
+            (Match.home_team.ilike(team_name), Match.home_score),
+            (Match.away_team.ilike(team_name), Match.away_score),
+            else_=0
+        )
+
+        goals_conceded = case(
+            (Match.home_team.ilike(team_name), Match.away_score),
+            (Match.away_team.ilike(team_name), Match.home_score),
+            else_=0
+        )
+
+        wins = case(
+            (
+                and_(
+                    Match.home_team.ilike(team_name),
+                    Match.home_score > Match.away_score
+                ), 1),
+            (
+                and_(
+                Match.away_team.ilike(team_name),
+                Match.away_score > Match.home_score
+            ), 1),
+            else_=0
+        )
+
+        draws = case(
+            (
+                and_(
+                    team_filter,
+                    Match.home_score == Match.away_score
+                ),
+                1
+            ),
+            else_=0
+        )
+
+        losses = case(
+            (
+                and_(
+                    Match.home_team.ilike(team_name),
+                    Match.home_score < Match.away_score
+                ), 1),
+            (
+                and_(
+                Match.away_team.ilike(team_name),
+                Match.away_score < Match.home_score
+            ), 1),
+            else_=0
+        )
+
+        query = (
+            select(
+                func.count(Match.id).label('matches'),
+                func.coalesce(func.sum(wins), 0).label('wins'),
+                func.coalesce(func.sum(draws), 0).label('draws'),
+                func.coalesce(func.sum(losses), 0).label('losses'),
+                func.coalesce(func.sum(goals_scored), 0).label('goals_scored'),
+                func.coalesce(func.sum(goals_conceded), 0).label('goals_conceded'),
+            ).where(
+                team_filter,
+                Match.status == MatchStatus.FINISHED
+            )
+        )
+
+        result = session.execute(query)
+
+        return result.mappings().first()
+
 
 statistics_repository = StatisticsRepository()

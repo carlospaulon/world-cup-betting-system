@@ -34,3 +34,10 @@ def get_user_statistics(current_user: User = Depends(get_current_user), db: Sess
 )
 def get_system_statistics(current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     return statistics_service.get_system_stats(db)
+
+@router.get(
+    "/team",
+    status_code=status.HTTP_200_OK
+)
+def get_team_statistics(team: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return statistics_service.get_team_stats(db, team)
