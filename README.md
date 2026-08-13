@@ -82,4 +82,4 @@ http://localhost:8000/docs
 - [X] Integração com API football-data.org
 - [X] Sistema de apostas com odds em tempo real
 - [X] Liquidação automática de apostas ao finalizar partida
-- [ ] Exceções personalizadas e handlers globais
+- [X] Exceções personalizadas e handlers globais
