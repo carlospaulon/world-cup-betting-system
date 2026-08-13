@@ -85,6 +85,30 @@ class ExportService:
 
         return output.getvalue()
 
+    def export_team_csv(self, session: Session, team: str):
+            stats = statistics_service.get_team_stats(session, team)
+    
+            output = io.StringIO()
+            
+            writer = csv.DictWriter(
+                output,
+                fieldnames=[
+                    'team',
+                    'matches',
+                    'wins',
+                    'draws',
+                    'losses',
+                    'goals_scored',
+                    'goals_conceded',
+                    'goal_difference',
+                    'win_rate',
+                ],
+            )
+            
+            writer.writeheader()
+            writer.writerow(stats.model_dump())
+    
+            return output.getvalue()
 
 
 

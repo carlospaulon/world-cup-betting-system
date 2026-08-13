@@ -68,3 +68,23 @@ def export_match_stats_csv(
             "Content-Disposition": "attachment; filename=match_stats.csv"
         }
     )
+
+@router.get(
+    "/admin/team/csv",
+    status_code=status.HTTP_200_OK
+)
+def export_team_stats_csv(
+    team: str,
+    current_admin: User = Depends(get_current_admin), 
+    db: Session = Depends(get_db)
+):
+    export_service = ExportService()
+    csv_data = export_service.export_team_csv(db, team)
+
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": "attachment; filename=team_stats.csv"
+        }
+    )
