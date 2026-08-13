@@ -58,5 +58,33 @@ class ExportService:
 
         return output.getvalue()
 
+    def export_match_csv(self, session: Session, match_id: int):
+        stats = statistics_service.get_match_stats(session, match_id)
+
+        output = io.StringIO()
+        
+        writer = csv.DictWriter(
+            output,
+            fieldnames=[
+                "match_id",
+                "home_team",
+                "away_team",
+                "status",
+                "total_bets",
+                "bets_home_win",
+                "bets_away_win",
+                "bets_draw",
+                "odds_home",
+                "odds_away",
+                "odds_draw",
+            ],
+        )
+        
+        writer.writeheader()
+        writer.writerow(stats.model_dump())
+
+        return output.getvalue()
+
+
 
 
