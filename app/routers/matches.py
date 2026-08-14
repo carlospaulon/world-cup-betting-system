@@ -28,6 +28,8 @@ def get_matches(db: Session = Depends(get_db), team: str | None = None):
     
     return match_service.get_open_matches(db)
 
+# matches available com filtros
+
 # pega partida por id de Match
 @router.get(
     "/matches/{match_id}",
@@ -38,14 +40,6 @@ def get_matches(match_id: int, db: Session = Depends(get_db)):
     
     return match_repository.get_by_id(db, match_id)
 
-@router.get(
-        "/admin/matches/{id}/bets",
-        status_code=status.HTTP_200_OK,
-        response_model=list[BetResponse]
-)
-def get_match_bets(id: int, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
-    return bet_repository.get_bets_for_match(db, id)
-
 # importa partidas da api para o banco (apenas o admin faz)
 @router.post(
     "/admin/matches/import",
@@ -55,6 +49,13 @@ def import_matches(current_admin: User = Depends(get_current_admin), db: Session
     match_service = MatchService()
     return match_service.import_matches(db)
 
+@router.get(
+        "/admin/matches/{id}/bets",
+        status_code=status.HTTP_200_OK,
+        response_model=list[BetResponse]
+)
+def get_match_bets(id: int, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return bet_repository.get_bets_for_match(db, id)
 
 @router.patch(
     "/admin/matches/{id}/finish",

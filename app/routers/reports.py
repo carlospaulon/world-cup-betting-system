@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, status, Depends, Response
 from sqlalchemy.orm import Session
 from app.core.security import get_current_admin
@@ -35,11 +36,12 @@ def export_system_stats_csv(
     status_code=status.HTTP_200_OK
 )
 def export_user_stats_csv(
+    user_id: uuid.UUID,
     current_admin: User = Depends(get_current_admin), 
     db: Session = Depends(get_db)
 ):
     export_service = ExportService()
-    csv_data = export_service.export_user_csv(db, current_admin.id)
+    csv_data = export_service.export_user_csv(db, user_id)
 
     return Response(
         content=csv_data,
