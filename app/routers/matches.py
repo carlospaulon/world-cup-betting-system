@@ -42,7 +42,7 @@ def get_matches(match_id: int, db: Session = Depends(get_db)):
 
 # importa partidas da api para o banco (apenas o admin faz)
 @router.post(
-    "/admin/matches/import",
+    "/matches/admin/import",
     status_code=status.HTTP_201_CREATED
 )
 def import_matches(current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
@@ -50,15 +50,15 @@ def import_matches(current_admin: User = Depends(get_current_admin), db: Session
     return match_service.import_matches(db)
 
 @router.get(
-        "/admin/matches/{id}/bets",
-        status_code=status.HTTP_200_OK,
-        response_model=list[BetResponse]
+    "/matches/admin/{id}/bets",
+    status_code=status.HTTP_200_OK,
+    response_model=list[BetResponse]
 )
 def get_match_bets(id: int, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     return bet_repository.get_bets_for_match(db, id)
 
 @router.patch(
-    "/admin/matches/{id}/finish",
+    "/matches/admin/{id}/finish",
 )
 def finish_match(id: int, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     match_service = MatchService()
@@ -66,7 +66,7 @@ def finish_match(id: int, current_admin: User = Depends(get_current_admin), db: 
     return match_service.finish_match(db, id)
 
 @router.patch(
-    "/admin/matches/{match_id}/status"
+    "/matches/admin/{match_id}/status"
 )
 def update_status(match_id: int, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     match_service = MatchService()
