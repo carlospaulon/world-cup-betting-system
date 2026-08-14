@@ -21,6 +21,17 @@ class BetRepository(BaseRepository[Bet]):
 
         return result.scalars().all()
 
+    def filter_bets(self, session: Session, user_id: uuid.UUID, status: BetStatus):
+        query = select(self.model).where(self.model.user_id == user_id)
+
+        if status is not None:
+            query = query.where(status == self.model.status)
+
+        result = session.execute(query)
+
+        return result.scalars().all()
+
+
     def get_bets_for_match(self, session: Session, match_id: int) -> list[Bet]:
         query = select(self.model).where(self.model.match_id == match_id)
         result = session.execute(query)

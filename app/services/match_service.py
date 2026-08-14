@@ -4,6 +4,7 @@ from app.repositories.match_repository import match_repository
 from app.services.football_api_service import FootballService
 from app.schemas.match import FootballApiResponse, MatchResponse, MatchApiData
 from app.models.enum.match_enum import MatchResult, MatchStatus
+from app.models.enum.bet_enum import BetPrediction
 from app.core.exceptions import MatchNotFoundException
 from app.services.bet_service import BetService
 
@@ -36,9 +37,26 @@ class MatchService:
         }
     
     def get_open_matches(self, session: Session):
-        open_matches = match_repository.get_all_open(session)
+        bet_service = BetService()
+        matches = match_repository.get_all_open(session)
+        open_matches = []
+
+        for match in matches:
+            home_odds = bet_service.calculate_odds(session, match.id, BetPrediction.HOME_WIN)
+            away_odds = bet_service.calculate_odds(session, match.id, BetPrediction.AWAY_WIN)
+
+            response = MatchResponse.model_validate(match)
+            response.home_score = None
+            response.away_score = None
+            response.match_result = None
+            response.odds_home = home_odds
+            response.odds_away = away_odds
+
+
+            open_matches.append(response)
+
         return open_matches
-        # Calcular odds?
+
 
     # list de matchresponse?
     def get_team_history(self, session: Session, team_name: str) -> list[Match]:

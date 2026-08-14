@@ -1,11 +1,13 @@
 import uuid
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends, Query
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.schemas.bet import BetResponse, BetCreate, BetWithMatchResponse, BetMultiply
 from app.core.security import get_current_user
 from app.models.user import User
 from app.core.database import get_db
 from app.services.bet_service import BetService
+from app.schemas.bet import BetStatus
 from app.repositories.bet_repository import bet_repository
 from app.repositories.user_repository import UserRepository
 
@@ -29,8 +31,8 @@ def create_bet(bet: BetCreate, current_user: User = Depends(get_current_user), d
     response_model=list[BetWithMatchResponse],
     status_code=status.HTTP_200_OK
 )
-def get_bets(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return bet_service.get_user_bets(db, current_user)
+def get_bets(current_user: User = Depends(get_current_user), db: Session = Depends(get_db), bet_status: Optional[BetStatus] = Query(None, description="Bet Status")):
+    return bet_service.get_user_bets(db, current_user, bet_status)
 
 
 @router.get(
