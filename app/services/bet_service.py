@@ -147,7 +147,7 @@ class BetService:
         for bet in bets:
             user = user_repository.get_by_id(session, bet.user_id)
 
-            if bet.prediction == MatchResult.WON:
+            if bet.prediction == match.match_result:
                 bet.result = BetResult.WON
                 poinst_earned = round(bet.points_bet * bet.odds, 2)
                 user_repository.update_points(session, user.id, poinst_earned)
