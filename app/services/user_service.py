@@ -1,8 +1,9 @@
+import uuid
 from fastapi import status
 from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserResponse, UserUpdatePassword
 from app.models.user import User
-from app.core.exceptions import UserAlreadyExistsException,UserNotFoundException, InvalidCredentialsException
+from app.core.exceptions import UserAlreadyExistsException,UserNotFoundException, InvalidCredentialsException, UserAlreadyIsAdminException
 from app.repositories.user_repository import user_repository
 from app.core.security import hash_password, verify_password, validate_password_strength
 
@@ -41,6 +42,23 @@ class UserService:
         
         created_user = user_repository.create(session, user)
         return UserResponse.model_validate(created_user)
+
+    def update_is_admin(self, session: Session, admin_user: User, user_id: uuid.UUID):
+        user = user_repository.get_by_id(session, user_id)
+
+        if not user:
+            raise UserNotFoundException()
+
+        if user.is_admin:
+            raise UserAlreadyIsAdminException()
+
+        if not admin_user.is_admin:
+            raise InvalidCredentialsException()
+
+        user_repository.update_is_admin(session, user.id)
+
+        return user
+
     
     def update_password(self, session: Session, user_id,  data: UserUpdatePassword):
         user = user_repository.get_by_id(session, user_id)

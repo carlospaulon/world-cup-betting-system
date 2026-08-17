@@ -1,3 +1,4 @@
+import uuid
 from app.models.user import User
 from app.models.bet import Bet
 from app.models.enum.bet_enum import BetResult
@@ -44,6 +45,14 @@ class UserRepository(BaseRepository[User]):
         result = session.execute(query)
 
         return result.scalars().first()
+
+    def update_is_admin(self, session: Session, user_id: uuid.UUID):
+        query = update(self.model).where(self.model.id == user_id).values(is_admin=True)
+        session.execute(query)
+        session.commit()
+
+        return self.get_by_id(session, user_id)
+
     
     def update_points(self, session: Session, user_id, delta: int) -> User:
         query = update(self.model).where(self.model.id == user_id).values(points=self.model.points + delta) 

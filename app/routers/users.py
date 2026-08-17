@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, status, Depends
 from app.schemas.user import UserResponse, UserUpdatePassword
 from sqlalchemy.orm import Session
@@ -49,14 +50,22 @@ def get_points(current_user: User = Depends(get_current_user), db: Session = Dep
 def get_ranking(db: Session = Depends(get_db)):
     return user_repository.get_ranking(db)
 
+@router.patch(
+    "/admin/{user_id}/role",
+)
+def promote_to_admin(user_id: uuid.UUID, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    user_service = UserService()
+    return user_service.update_is_admin(db, current_admin, user_id)
+
 @router.get(
     "/admin/users" # ajustar rota
 )
 def get_users_status(current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     return user_repository.get_users_actives(db)
 
+# [ ] Mudar responses para users
 @router.get(
-    "/admin/users/all"
+    "/admin/all",
 )
 def get_all_users(current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     users = user_repository.get_all(db)
@@ -68,4 +77,3 @@ def get_all_users(current_admin: User = Depends(get_current_admin), db: Session 
 )
 def get_users_by_cpf(cpf: str, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     return user_repository.get_by_cpf(db, cpf) # tratar no service
-
