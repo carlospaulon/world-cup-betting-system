@@ -1,11 +1,14 @@
 from sqlalchemy.orm import Session
+from typing import Optional
+from datetime import date
+from app.models.user import User
 from app.models.match import Match
 from app.repositories.match_repository import match_repository
 from app.services.football_api_service import FootballService
 from app.schemas.match import FootballApiResponse, MatchResponse, MatchApiData
 from app.models.enum.match_enum import MatchResult, MatchStatus
 from app.models.enum.bet_enum import BetPrediction
-from app.core.exceptions import MatchNotFoundException
+from app.core.exceptions import MatchNotFoundException, InvalidDateRangeException
 from app.services.bet_service import BetService
 
 class MatchService:
@@ -35,10 +38,33 @@ class MatchService:
             "matches_imported": imported,
             "matches_ignored": ignored
         }
-    
-    def get_open_matches(self, session: Session):
+
+    # Pega open, pega com filtro de time, status e stage
+    def get_matches(
+            self, 
+            session: Session,
+            team_name: Optional[str] = None,
+            match_status: Optional[MatchStatus] = None,
+            stage: Optional[str] = None,
+            from_date: Optional[date] = None,
+            to_date: Optional[date] = None
+        ):
+
         bet_service = BetService()
-        matches = match_repository.get_all_open(session)
+
+        if from_date and to_date and from_date > to_date:
+            raise InvalidDateRangeException()
+
+
+        matches = match_repository.filter_matches(
+            session=session,
+            team_name=team_name,
+            status=match_status,
+            stage=stage,
+            from_date=from_date,
+            to_date=to_date
+        )
+
         open_matches = []
 
         for match in matches:
@@ -55,12 +81,18 @@ class MatchService:
 
             open_matches.append(response)
 
+        if not open_matches:
+            raise MatchNotFoundException()
+
         return open_matches
 
 
     # list de matchresponse?
     def get_team_history(self, session: Session, team_name: str) -> list[Match]:
         team_history = match_repository.get_by_team(session, team_name)
+
+        if not team_history:
+            raise MatchNotFoundException()
 
         return team_history
     

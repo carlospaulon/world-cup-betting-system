@@ -1,9 +1,12 @@
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends, Query
+from datetime import date
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.core.security import get_current_user, get_current_admin
 from app.repositories.match_repository import match_repository
 from app.services.match_service import MatchService
 from app.schemas.match import MatchResponse
+from app.models.enum.match_enum import MatchStatus
 from app.schemas.bet import BetResponse
 from app.core.database import get_db
 from app.models.user import User
@@ -20,13 +23,36 @@ router = APIRouter(
     response_model=list[MatchResponse],
     status_code=status.HTTP_200_OK
 )
-def get_matches(db: Session = Depends(get_db), team: str | None = None):
+def get_matches(
+    db: Session = Depends(get_db), 
+    team: Optional[str] = Query(None, description="Filter by home or away team"), 
+    match_status: Optional[MatchStatus] = Query(None, description="Match Status "),
+    stage: Optional[str] = Query(None, description="Match Stage"),
+    from_date: Optional[date] = Query(None, description="From Date (AAAA-MM-DD)"),
+    to_date: Optional[date] = Query(None, description="To Date (AAAA-MM-DD)"),
+    ):
+
     match_service = MatchService()
 
-    if team:
-        return match_service.get_team_history(db, team)
     
-    return match_service.get_open_matches(db)
+    return match_service.get_matches(
+        db,
+        team,
+        match_status,
+        stage,
+        from_date,
+        to_date
+    )
+
+@router.get(
+    "/matches/history/{team}",
+    response_model=list[MatchResponse],
+    status_code=status.HTTP_200_OK
+)
+def get_team_history(team: str, db: Session = Depends(get_db)):
+    match_service = MatchService()
+
+    return match_service.get_team_history(db, team)
 
 # matches available com filtros
 

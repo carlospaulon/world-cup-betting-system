@@ -1,3 +1,5 @@
+from typing import Optional
+from datetime import datetime, time, timedelta
 from app.repositories.base_repository import BaseRepository
 from app.models.match import Match
 from app.models.enum.match_enum import MatchStatus, MatchResult
@@ -22,6 +24,45 @@ class MatchRepository(BaseRepository[Match]):
     
     def get_all_open(self, session: Session) -> list[Match]:
         query = select(self.model).where(self.model.status == MatchStatus.TIMED)
+        result = session.execute(query)
+
+        return result.scalars().all()
+
+    def filter_matches(
+        self, 
+        session: Session, 
+        team_name: Optional[str] = None,
+        status: Optional[MatchStatus] = None,
+        stage: Optional[str] = None,
+        from_date: Optional[datetime] = None,
+        to_date: Optional[datetime] = None
+    ):
+        query = select(self.model)
+        filters = []
+
+        if team_name is not None:
+            filters.append(or_(
+                self.model.home_team.ilike(f'%{team_name}%'),
+                self.model.away_team.ilike(f'%{team_name}%')
+                ))
+
+        if status is not None:
+            filters.append(self.model.status == status)
+
+        if stage is not None:
+            filters.append(self.model.stage == stage.upper())
+
+        if from_date is not None:
+            filters.append(self.model.match_date >= datetime.combine(from_date, time.min)) # transformo em datetime min
+
+        if to_date is not None:
+            next_day = to_date + timedelta(days=1) # pego exatamente na data do to_date passado
+
+            filters.append(self.model.match_date < datetime.combine(next_day, time.min))
+
+        if filters:
+            query = query.where(*filters)
+
         result = session.execute(query)
 
         return result.scalars().all()

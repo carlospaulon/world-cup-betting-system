@@ -9,6 +9,10 @@ class UnderageUserException(AppException):
     def __init__(self, message: str = "User must be at least 18 years old", status_code: int = 400):
         super().__init__(message, status_code)
 
+class InvalidDateRangeException(AppException):
+    def __init__(self, message: str = "from_date must be before or equal to to_date", status_code: int = 400):
+        super().__init__(message, status_code)
+
 class UserAlreadyExistsException(AppException):
     def __init__(self, message: str = 'User already exists', status_code: int = 409):
         super().__init__(message, status_code)
