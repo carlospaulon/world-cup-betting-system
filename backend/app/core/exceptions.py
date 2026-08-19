@@ -53,6 +53,10 @@ class MatchNotOpenException(AppException):
     def __init__(self, message: str = 'Match is not open for betting', status_code: int = 409):
         super().__init__(message, status_code)
 
+class BetNotAvailableException(AppException):
+    def __init__(self, message: str = 'Match not available for bet', status_code: int = 409):
+        super().__init__(message, status_code)
+
 class UserAlreadyIsAdminException(AppException):
     def __init__(self, message: str = 'User already is an admin', status_code: int = 409):
         super().__init__(message, status_code)

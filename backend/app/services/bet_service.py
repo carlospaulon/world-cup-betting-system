@@ -10,7 +10,7 @@ from app.models.enum.bet_enum import BetPrediction, BetStatus, BetResult
 from app.schemas.bet import BetCreate, BetWithMatchResponse, BetResponse
 from app.repositories.bet_repository import bet_repository
 from app.repositories.match_repository import match_repository
-from app.core.exceptions import MatchNotFoundException, MatchNotOpenException, InsufficientPointsException, BetNotFoundException, BetAlreadySettledException
+from app.core.exceptions import MatchNotFoundException, MatchNotOpenException, InsufficientPointsException, BetNotFoundException, BetAlreadySettledException, BetNotAvailableException
 from app.models.enum.match_enum import MatchStatus, MatchResult
 from app.repositories.user_repository import user_repository
 
@@ -97,6 +97,9 @@ class BetService:
 
         if not match.status == MatchStatus.TIMED:
             raise MatchNotOpenException()
+
+        if not match.is_bet_available:
+            raise BetNotAvailableException()
 
         if data.points_bet > user.points:
             raise InsufficientPointsException()

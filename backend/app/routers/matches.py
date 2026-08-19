@@ -28,6 +28,7 @@ def get_matches(
     competition: Optional[str] = Query('WC', description="Filter by competition"),
     team: Optional[str] = Query(None, description="Filter by home or away team"), 
     match_status: Optional[MatchStatus] = Query(None, description="Match Status "),
+    is_bet_available: Optional[bool] = Query(None, description="Filter matches available for betting"),
     stage: Optional[str] = Query(None, description="Match Stage"),
     from_date: Optional[date] = Query(None, description="From Date (AAAA-MM-DD)"),
     to_date: Optional[date] = Query(None, description="To Date (AAAA-MM-DD)"),
@@ -41,6 +42,7 @@ def get_matches(
         competition,
         team,
         match_status,
+        is_bet_available,
         stage,
         from_date,
         to_date
@@ -101,3 +103,12 @@ def update_status(match_id: int, current_admin: User = Depends(get_current_admin
     match_service = MatchService()
 
     return match_service.update_status(db, match_id)
+
+
+@router.patch(
+    "/matches/admin/{match_id}/availability"
+)
+def update_bet_availability(match_id: int, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    match_service = MatchService()
+
+    return match_service.update_bet_availability(db, match_id)

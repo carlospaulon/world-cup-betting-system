@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { getMatches, importMatches, finishMatch, extractErrorMessage } from '../../api/client'
+import { getMatches, importMatches, finishMatch, extractErrorMessage, toggleMatchAvailability } from '../../api/client'
 import Loading from '../../components/ui/Loading'
 import EmptyState from '../../components/ui/EmptyState'
 import SortSelect from '../../components/ui/SortSelect'
@@ -32,6 +32,7 @@ export default function AdminMatches() {
   const [loading, setLoading] = useState(true)
   const [importing, setImporting] = useState(false)
   const [finishingId, setFinishingId] = useState(null)
+  const [togglingId, setTogglingId] = useState(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -71,6 +72,21 @@ export default function AdminMatches() {
       toast.error(extractErrorMessage(err))
     } finally {
       setImporting(false)
+    }
+  }
+
+  const handleToggleAvailability = async (id, currentStatus) => {
+    setTogglingId(id)
+    try {
+      await toggleMatchAvailability(id)
+      toast.success(
+        currentStatus ? 'Apostas desativadas para esta partida.' : 'Apostas liberadas para esta partida!'
+      )
+      load()
+    } catch (err) {
+      toast.error(extractErrorMessage(err))
+    } finally {
+      setTogglingId(null)
     }
   }
 
@@ -116,41 +132,83 @@ export default function AdminMatches() {
         </div>
       </div>
 
-      {loading ? (
-        <Loading />
-      ) : sortedMatches.length === 0 ? (
-        <EmptyState title="Nenhuma partida nesse status" subtitle="Ajuste o status ou a competição selecionada." />
-      ) : (
-        <div className="table-wrap">
-          <table className="data">
-            <thead>
-              <tr>
-                <th>Data</th><th>Competição</th><th>Partida</th><th>Fase</th><th>Status</th><th>Placar</th><th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedMatches.map((m) => (
-                <tr key={m.id}>
-                  <td>{formatDate(m.match_date)}</td>
-                  <td>{m.competition || '—'}</td>
-                  <td><Link to={`/partidas/${m.id}`}>{m.home_team} x {m.away_team}</Link></td>
-                  <td>{m.stage?.replaceAll('_', ' ')}</td>
-                  <td>{MATCH_STATUS_LABELS[m.status] || m.status}</td>
-                  <td>{m.status === 'FINISHED' ? `${m.home_score} - ${m.away_score}` : '—'}</td>
-                  <td style={{ display: 'flex', gap: 8 }}>
-                    <Link className="btn btn-ghost btn-sm" to={`/admin/partidas/${m.id}/apostas`}>Apostas</Link>
+    {loading ? (
+      <Loading />
+    ) : sortedMatches.length === 0 ? (
+      <EmptyState title="Nenhuma partida nesse status" subtitle="Ajuste o status ou a competição selecionada." />
+    ) : (
+      <div className="table-wrap">
+        <table className="data">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Comp.</th>
+              <th>Partida</th>
+              <th>Fase</th>
+              <th>Status</th>
+              <th>Placar</th>
+              <th style={{ textAlign: 'right' }}>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedMatches.map((m) => (
+              <tr key={m.id}>
+                <td>{formatDate(m.match_date)}</td>
+                <td>{m.competition || '—'}</td>
+                <td>
+                  <Link to={`/partidas/${m.id}`}>
+                    {m.home_team} x {m.away_team}
+                  </Link>
+                </td>
+                <td>{m.stage?.replaceAll('_', ' ')}</td>
+                <td>
+                  <span className={`badge ${m.status === 'FINISHED' ? 'badge-neutral' : 'badge-info'}`}>
+                    {MATCH_STATUS_LABELS[m.status] || m.status}
+                  </span>
+                </td>
+                <td>{m.status === 'FINISHED' ? `${m.home_score} - ${m.away_score}` : '—'}</td>
+                
+                {/* Coluna Ações compacta */}
+                <td>
+                  <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <Link className="btn btn-ghost btn-sm" to={`/admin/partidas/${m.id}/apostas`}>
+                      Apostas
+                    </Link>
+
+                    {/* Se estiver em TIMED, exibe Badge ou Botão de Liberar */}
+                    {m.status === 'TIMED' && (
+                      m.is_bet_available ? (
+                        <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>
+                          Liberada
+                        </span>
+                      ) : (
+                        <button
+                          className="btn btn-outline btn-sm"
+                          onClick={() => handleToggleAvailability(m.id, m.is_bet_available)}
+                          disabled={togglingId === m.id}
+                        >
+                          {togglingId === m.id ? 'Liberando…' : 'Liberar'}
+                        </button>
+                      )
+                    )}
+
                     {(m.status === 'TIMED' || m.status === 'IN_PLAY') && (
-                      <button className="btn btn-primary btn-sm" onClick={() => handleFinish(m.id)} disabled={finishingId === m.id}>
-                        {finishingId === m.id ? 'Buscando…' : 'Finalizar'}
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleFinish(m.id)}
+                        disabled={finishingId === m.id}
+                      >
+                        {finishingId === m.id ? 'Finalizando…' : 'Finalizar'}
                       </button>
                     )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
     </div>
   )
 }

@@ -56,7 +56,7 @@ export const finishMatch = (id) => api.patch(`/matches/admin/${id}/finish`)
 export const updateMatchStatus = (matchId, status) =>
   api.patch(`/matches/admin/${matchId}/status`, null, { params: { match_status: status } })
 export const getMatchBetsAdmin = (id) => api.get(`/matches/admin/${id}/bets`)
-
+export const toggleMatchAvailability = (id) => api.patch(`/matches/admin/${id}/availability`);
 /* ---------------- Bets ---------------- */
 export const createBet = (payload) => api.post('/bets', payload)
 export const getMyBets = (betStatus) =>

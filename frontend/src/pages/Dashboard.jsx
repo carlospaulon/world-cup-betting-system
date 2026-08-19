@@ -36,6 +36,7 @@ export default function Dashboard() {
         team: team || undefined,
         match_status: status,
         competition,
+        is_bet_available: status === 'TIMED' ? true : undefined,
       })
       setMatches(data)
     } catch (err) {

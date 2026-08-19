@@ -34,6 +34,7 @@ class MatchRepository(BaseRepository[Match]):
         competition: Optional[str] = None,
         team_name: Optional[str] = None,
         status: Optional[MatchStatus] = None,
+        is_bet_available: Optional[bool] = None,
         stage: Optional[str] = None,
         from_date: Optional[datetime] = None,
         to_date: Optional[datetime] = None
@@ -50,7 +51,7 @@ class MatchRepository(BaseRepository[Match]):
                 self.model.away_team.ilike(f'%{team_name}%')
                 ))
 
-        if status is not None:
+        if status is not None and self.model.is_bet_available:
             filters.append(self.model.status == status)
 
         if stage is not None:
@@ -63,6 +64,11 @@ class MatchRepository(BaseRepository[Match]):
             next_day = to_date + timedelta(days=1) # pego exatamente na data do to_date passado
 
             filters.append(self.model.match_date < datetime.combine(next_day, time.min))
+
+        if is_bet_available is not None:
+            filters.append(
+                self.model.is_bet_available == is_bet_available
+            )
 
         if filters:
             query = query.where(*filters)
@@ -114,5 +120,13 @@ class MatchRepository(BaseRepository[Match]):
         session.commit()
         return self.get_by_id(session, match_id)
 
+    def update_bet_availability(self, session: Session, match_id: int):
+        query = update(self.model).where(self.model.id == match_id).values(
+            is_bet_available = True
+        )
+
+        session.execute(query)
+        session.commit()
+        return self.get_by_id(session, match_id)
 
 match_repository = MatchRepository()

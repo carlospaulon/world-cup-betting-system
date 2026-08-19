@@ -18,6 +18,7 @@ class Match(Base):
     away_team: Mapped[str] = mapped_column(String(100))
     match_date: Mapped[datetime] = mapped_column(nullable=False)
     status: Mapped[MatchStatus] = mapped_column(Enum(MatchStatus), default=MatchStatus.TIMED)
+    is_bet_available: Mapped[bool] = mapped_column(default=False, nullable=False)
     stage: Mapped[str] = mapped_column(String(50))
     home_score: Mapped[int] = mapped_column(nullable=True)
     away_score: Mapped[int] = mapped_column(nullable=True)

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getMatchById, getTeamHistory, getMatches, extractErrorMessage } from '../api/client'
 import MatchTicket from '../components/MatchTicket'
@@ -14,47 +14,67 @@ export default function MatchDetail() {
   const [awayHistory, setAwayHistory] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    let active = true
-    setLoading(true)
-    getMatchById(id)
-      .then(async ({ data }) => {
-        if (!active) return
-        setMatch(data)
+  // Função isolada de carregamento (sem disparar re-render em loop)
+  const fetchAllData = useCallback(async (isInitial = false) => {
+    if (isInitial) setLoading(true)
+    try {
+      const { data } = await getMatchById(id)
+      let updatedMatch = { ...data }
 
-        // GET /matches/{id} não calcula odds_home/odds_away (só a listagem faz isso).
-        // Buscamos a listagem do mesmo status para completar as odds reais aqui.
-        if (data.status === 'TIMED' || data.status === 'IN_PLAY') {
-          getMatches({ match_status: data.status })
-            .then(({ data: list }) => {
-              if (!active) return
-              const withOdds = list.find((m) => m.id === data.id)
-              if (withOdds) {
-                setMatch((prev) => (prev ? { ...prev, odds_home: withOdds.odds_home, odds_away: withOdds.odds_away, odds_draw: withOdds.odds_draw } : prev))
-              }
-            })
-            .catch(() => {})
-        }
+      if (data.status === 'TIMED' || data.status === 'IN_PLAY') {
+        try {
+          const { data: list } = await getMatches({
+            match_status: data.status,
+            competition: data.competition,
+            is_bet_available: true,
+          })
+          const withOdds = list.find((m) => m.id === data.id)
+          if (withOdds) {
+            updatedMatch = {
+              ...updatedMatch,
+              odds_home: withOdds.odds_home,
+              odds_away: withOdds.odds_away,
+              odds_draw: withOdds.odds_draw,
+            }
+          }
+        } catch (_) {}
+      }
 
+      setMatch(updatedMatch)
+
+      // Histórico é buscado apenas no carregamento inicial para economizar requisições
+      if (isInitial) {
         const [home, away] = await Promise.all([
           getTeamHistory(data.home_team).catch(() => ({ data: [] })),
           getTeamHistory(data.away_team).catch(() => ({ data: [] })),
         ])
-        if (!active) return
+
         const now = Date.now()
         const recentFirst = (list) =>
           list
             .filter((m) => m.id !== data.id && new Date(m.match_date).getTime() <= now)
             .sort((a, b) => new Date(b.match_date) - new Date(a.match_date))
             .slice(0, 5)
+
         setHomeHistory(recentFirst(home.data))
         setAwayHistory(recentFirst(away.data))
-      })
-      .catch((err) => toast.error(extractErrorMessage(err)))
-      .finally(() => active && setLoading(false))
-    return () => { active = false }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id])
+      }
+    } catch (err) {
+      toast.error(extractErrorMessage(err))
+    } finally {
+      if (isInitial) setLoading(false)
+    }
+  }, [id, toast])
+
+  // Roda uma única vez na montagem
+  useEffect(() => {
+    fetchAllData(true)
+  }, [id]) // Depende apenas do id da URL
+
+  // Callback leve exclusivo para atualizar após apostar
+  const handleBetPlaced = useCallback(() => {
+    fetchAllData(false)
+  }, [fetchAllData])
 
   if (loading) return <div className="container page"><Loading /></div>
   if (!match) return null
@@ -64,7 +84,7 @@ export default function MatchDetail() {
       <Link to="/" className="muted" style={{ fontSize: 13 }}>&larr; Voltar às partidas</Link>
 
       <div style={{ maxWidth: 420, margin: '20px 0 36px' }}>
-        <MatchTicket match={match} linkable={false} />
+        <MatchTicket match={match} linkable={false} onBetPlaced={handleBetPlaced} />
       </div>
 
       <div className="section-head"><h2 className="h2">Retrospecto recente</h2></div>

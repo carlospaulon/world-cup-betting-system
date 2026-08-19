@@ -56,6 +56,7 @@ class MatchResponse(BaseModel):
     stage: Optional[str] = None
     match_date: Optional[datetime] = None
     status: Optional[MatchStatus] = None # Enum
+    is_bet_available: bool = False
     home_team: Optional[str] = None
     away_team: Optional[str] = None
     home_score: Optional[int] = None

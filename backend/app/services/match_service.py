@@ -6,9 +6,9 @@ from app.models.match import Match
 from app.repositories.match_repository import match_repository
 from app.services.football_api_service import FootballService
 from app.schemas.match import FootballApiResponse, MatchResponse, MatchApiData
-from app.models.enum.match_enum import MatchResult, MatchStatus
+from app.models.enum.match_enum import MatchStatus
 from app.models.enum.bet_enum import BetPrediction
-from app.core.exceptions import MatchNotFoundException, InvalidDateRangeException
+from app.core.exceptions import MatchNotFoundException, InvalidDateRangeException, MatchNotOpenException
 from app.services.bet_service import BetService
 
 class MatchService:
@@ -47,9 +47,10 @@ class MatchService:
             competition: str = 'WC',
             team_name: Optional[str] = None,
             match_status: Optional[MatchStatus] = None,
+            is_bet_available: Optional[bool] = None,
             stage: Optional[str] = None,
             from_date: Optional[date] = None,
-            to_date: Optional[date] = None
+            to_date: Optional[date] = None,
         ):
 
         bet_service = BetService()
@@ -63,6 +64,7 @@ class MatchService:
             competition=competition,
             team_name=team_name,
             status=match_status,
+            is_bet_available=is_bet_available,
             stage=stage,
             from_date=from_date,
             to_date=to_date
@@ -156,4 +158,16 @@ class MatchService:
             raise MatchNotFoundException()
 
         update_match = match_repository.update_status(session, match_id)
+        return MatchResponse.model_validate(update_match)
+
+    def update_bet_availability(self, session: Session, match_id: int):
+        current_match = match_repository.get_by_id(session, match_id)
+
+        if not current_match:
+            raise MatchNotFoundException()
+        
+        if current_match.status != MatchStatus.TIMED:
+            raise MatchNotOpenException()
+
+        update_match = match_repository.update_bet_availability(session, match_id)
         return MatchResponse.model_validate(update_match)
