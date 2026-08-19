@@ -12,13 +12,13 @@ from app.core.exceptions import MatchNotFoundException, InvalidDateRangeExceptio
 from app.services.bet_service import BetService
 
 class MatchService:
-    def import_matches(self, session: Session):
+    def import_matches(self, session: Session, competition: str = 'WC'):
         # controle
         ignored = 0
         imported = 0
 
         football_service = FootballService() # injeta footballService
-        response = football_service.fetch_matches() # JSON
+        response = football_service.fetch_matches(competition) # JSON
         matches = FootballApiResponse.model_validate(response).matches # Lista de matchApiData
 
         for match in matches:
@@ -35,6 +35,7 @@ class MatchService:
             imported += 1    
 
         return {
+            "competition": competition.upper(),
             "matches_imported": imported,
             "matches_ignored": ignored
         }
@@ -43,6 +44,7 @@ class MatchService:
     def get_matches(
             self, 
             session: Session,
+            competition: str = 'WC',
             team_name: Optional[str] = None,
             match_status: Optional[MatchStatus] = None,
             stage: Optional[str] = None,
@@ -58,6 +60,7 @@ class MatchService:
 
         matches = match_repository.filter_matches(
             session=session,
+            competition=competition,
             team_name=team_name,
             status=match_status,
             stage=stage,
@@ -72,9 +75,12 @@ class MatchService:
             away_odds = bet_service.calculate_odds(session, match.id, BetPrediction.AWAY_WIN)
 
             response = MatchResponse.model_validate(match)
-            response.home_score = None
-            response.away_score = None
-            response.match_result = None
+            
+            if match.status == MatchStatus.TIMED:
+                response.home_score = None
+                response.away_score = None
+                response.match_result = None
+
             response.odds_home = home_odds
             response.odds_away = away_odds
 
@@ -114,6 +120,7 @@ class MatchService:
         # Mudar tipo para none
         transformed = {
             "api_match_id": str(response.get("id")),
+            "competition": current_match.competition,
             'stage': response.get('stage'),
             'match_date': response.get('utcDate'),
             'status': response.get('status'),
