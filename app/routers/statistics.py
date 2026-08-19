@@ -21,7 +21,7 @@ statistics_service = StatisticsService()
     response_model=UserStats
 )
 def get_user_statistics(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return statistics_service.get_user_stats(db, current_user.id)
+    return statistics_service.get_user_stats(db, current_user.cpf)
 
 @router.get(
     "/team",
@@ -52,5 +52,5 @@ def get_matches_statistics(match_id: int, current_admin: User = Depends(get_curr
     status_code=status.HTTP_200_OK,
     response_model=UserStats
 )
-def get_user_statistics_admin(user_id: uuid.UUID, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
-    return statistics_service.get_user_stats(db, user_id)
+def get_user_statistics_admin(cpf: str, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return statistics_service.get_user_stats(db, cpf)

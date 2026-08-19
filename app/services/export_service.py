@@ -30,8 +30,8 @@ class ExportService:
         return output.getvalue()
 
 
-    def export_user_csv(self, session: Session, user_id: uuid.UUID):
-        stats = statistics_service.get_user_stats(session, user_id)
+    def export_user_csv(self, session: Session, cpf: str):
+        stats = statistics_service.get_user_stats(session, cpf)
 
         output = io.StringIO()
 

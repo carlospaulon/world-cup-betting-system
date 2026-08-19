@@ -42,7 +42,7 @@ class StatisticsRepository():
         return result.mappings().first() # retorna um dict
 
     # checar performance!
-    def get_user_stats(self, session: Session, user_id: uuid):
+    def get_user_stats(self, session: Session, cpf: str):
         # stats geral
         query_general = (select(
             User.id.label("user_id"),
@@ -66,7 +66,7 @@ class StatisticsRepository():
                 .label("points_invested"),
             )
             .join(Bet, Bet.user_id == User.id, isouter=True)
-            .where(User.id == user_id)
+            .where(User.cpf == cpf)
             .group_by(
                 User.id,
                 User.nickname,
@@ -79,7 +79,7 @@ class StatisticsRepository():
             Bet.prediction,
             func.count(Bet.id).label("total")
         )
-        .where(Bet.user_id == user_id)
+        .where(User.cpf == cpf)
         .group_by(Bet.prediction)
         .order_by(func.count(Bet.id).desc())
         .limit(1)
@@ -99,7 +99,7 @@ class StatisticsRepository():
                 func.count(Bet.id)
             )
             .join(Match, Match.id == Bet.match_id)
-            .where(Bet.user_id == user_id)
+            .where(User.cpf == cpf)
             .where(Bet.prediction != BetPrediction.DRAW)
             .group_by(team)
             .order_by(func.count(Bet.id).desc())
@@ -153,14 +153,14 @@ class StatisticsRepository():
         )
 
         goals_scored = case(
-            (Match.home_team.ilike(search_pattern), Match.home_score),
-            (Match.away_team.ilike(search_pattern), Match.away_score),
+            (Match.home_team.ilike(search_pattern), func.coalesce(Match.home_score, 0)),
+            (Match.away_team.ilike(search_pattern), func.coalesce(Match.away_score, 0)),
             else_=0
         )
 
         goals_conceded = case(
-            (Match.home_team.ilike(search_pattern), Match.away_score),
-            (Match.away_team.ilike(search_pattern), Match.home_score),
+            (Match.home_team.ilike(search_pattern), func.coalesce(Match.away_score, 0)),
+            (Match.away_team.ilike(search_pattern), func.coalesce(Match.home_score, 0)),
             else_=0
         )
 

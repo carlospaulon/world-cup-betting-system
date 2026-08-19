@@ -36,18 +36,18 @@ def export_system_stats_csv(
     status_code=status.HTTP_200_OK
 )
 def export_user_stats_csv(
-    user_id: uuid.UUID,
+    cpf: str,
     current_admin: User = Depends(get_current_admin), 
     db: Session = Depends(get_db)
 ):
     export_service = ExportService()
-    csv_data = export_service.export_user_csv(db, user_id)
+    csv_data = export_service.export_user_csv(db, cpf)
 
     return Response(
         content=csv_data,
         media_type="text/csv",
         headers={
-            "Content-Disposition": "attachment; filename=user_stats.csv"
+            "Content-Disposition": f"attachment; filename=user_stats_{cpf}.csv"
         }
     )
 
