@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from .core.config import Settings, get_settings
 from .core.database import get_db
 from sqlalchemy import text
@@ -8,6 +9,14 @@ from .core.exceptions import AppException
 from app.routers import auth, users, matches, bets, statistics, reports, prediction
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Em produção, substitua pelo URL do seu frontend (ex: "http://localhost:3000")
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.exception_handler(AppException)
 def global_exception_handler(request: Request, exc: AppException):

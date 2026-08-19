@@ -18,10 +18,10 @@ Sistema de apostas para a Copa do Mundo 2026 desenvolvido como projeto final do 
 ## Arquitetura
 
 ### Diagrama Lógico
-![Diagrama Lógico](docs/diagrama_logico.png)
+![Diagrama Lógico](backend/docs/diagrama_logico.png)
 
 ### Diagrama Conceitual
-![Diagrama Conceitual](docs/diagrama_conceitual.png)
+![Diagrama Conceitual](backend/docs/diagrama_conceitual.png)
 
 ## Stack atual
 

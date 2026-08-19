@@ -1,0 +1,68 @@
+:root {
+  /* ---- Color: stadium at night + scoreboard amber ---- */
+  --bg: #0A1F17;
+  --bg-deep: #071612;
+  --surface: #12291F;
+  --surface-2: #17342A;
+  --surface-3: #1E3F32;
+  --border: rgba(216, 232, 220, 0.10);
+  --border-strong: rgba(216, 232, 220, 0.20);
+
+  --text: #F1EFE4;
+  --text-dim: #A9C2B0;
+  --text-faint: #6F8A7A;
+
+  --gold: #F0B93E;
+  --gold-strong: #FFD26B;
+  --gold-dim: #9A7A2E;
+
+  --turf: #74C273;
+  --turf-dim: #2E4A31;
+  --scarlet: #E6553A;
+  --scarlet-dim: #4A2C24;
+
+  --draw: #8FA6C9;
+
+  /* ---- Type ---- */
+  --font-display: 'Oswald', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* ---- Shape / rhythm ---- */
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 16px;
+  --shadow-card: 0 10px 30px -12px rgba(0,0,0,0.55);
+  --shadow-pop: 0 20px 50px -18px rgba(0,0,0,0.7);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(240,185,62,0.07), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(116,194,115,0.06), transparent 55%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

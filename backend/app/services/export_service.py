@@ -1,6 +1,5 @@
 import csv
 import io
-import uuid
 from sqlalchemy.orm import Session
 from app.services.statistics_service import StatisticsService
 

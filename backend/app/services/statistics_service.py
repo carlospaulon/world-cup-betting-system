@@ -1,4 +1,3 @@
-import uuid
 from sqlalchemy.orm import Session
 from app.repositories.match_repository import match_repository
 from app.repositories.statistics_repository import statistics_repository
