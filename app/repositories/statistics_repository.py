@@ -145,36 +145,38 @@ class StatisticsRepository():
         return result.mappings().first()
 
     def get_team_stats(self, session: Session, team_name: str):
+        search_pattern = f"%{team_name}%" # ajuda a encontrar o ilike com %
 
         team_filter = or_(
-            Match.home_team.ilike(f'%{team_name}%'),
-            Match.away_team.ilike(f'%{team_name}%')
+            Match.home_team.ilike(search_pattern),
+            Match.away_team.ilike(search_pattern)
         )
-            
 
         goals_scored = case(
-            (Match.home_team.ilike(team_name), Match.home_score),
-            (Match.away_team.ilike(team_name), Match.away_score),
+            (Match.home_team.ilike(search_pattern), Match.home_score),
+            (Match.away_team.ilike(search_pattern), Match.away_score),
             else_=0
         )
 
         goals_conceded = case(
-            (Match.home_team.ilike(team_name), Match.away_score),
-            (Match.away_team.ilike(team_name), Match.home_score),
+            (Match.home_team.ilike(search_pattern), Match.away_score),
+            (Match.away_team.ilike(search_pattern), Match.home_score),
             else_=0
         )
 
         wins = case(
             (
                 and_(
-                    Match.home_team.ilike(team_name),
+                    Match.home_team.ilike(search_pattern),
                     Match.home_score > Match.away_score
-                ), 1),
+                ), 1
+            ),
             (
                 and_(
-                Match.away_team.ilike(team_name),
-                Match.away_score > Match.home_score
-            ), 1),
+                    Match.away_team.ilike(search_pattern),
+                    Match.away_score > Match.home_score
+                ), 1
+            ),
             else_=0
         )
 
@@ -183,8 +185,7 @@ class StatisticsRepository():
                 and_(
                     team_filter,
                     Match.home_score == Match.away_score
-                ),
-                1
+                ), 1
             ),
             else_=0
         )
@@ -192,14 +193,16 @@ class StatisticsRepository():
         losses = case(
             (
                 and_(
-                    Match.home_team.ilike(team_name),
+                    Match.home_team.ilike(search_pattern),
                     Match.home_score < Match.away_score
-                ), 1),
+                ), 1
+            ),
             (
                 and_(
-                Match.away_team.ilike(team_name),
-                Match.away_score < Match.home_score
-            ), 1),
+                    Match.away_team.ilike(search_pattern),
+                    Match.away_score < Match.home_score
+                ), 1
+            ),
             else_=0
         )
 
@@ -218,7 +221,6 @@ class StatisticsRepository():
         )
 
         result = session.execute(query)
-
         return result.mappings().first()
 
 

@@ -25,6 +25,7 @@ router = APIRouter(
 )
 def get_matches(
     db: Session = Depends(get_db), 
+    competition: Optional[str] = Query('WC', description="Filter by competition"),
     team: Optional[str] = Query(None, description="Filter by home or away team"), 
     match_status: Optional[MatchStatus] = Query(None, description="Match Status "),
     stage: Optional[str] = Query(None, description="Match Stage"),
@@ -37,6 +38,7 @@ def get_matches(
     
     return match_service.get_matches(
         db,
+        competition,
         team,
         match_status,
         stage,
@@ -67,13 +69,14 @@ def get_matches(match_id: int, db: Session = Depends(get_db)):
     return match_repository.get_by_id(db, match_id)
 
 # importa partidas da api para o banco (apenas o admin faz)
+# import sem parâmetro (WC), com pega outra competição para import
 @router.post(
     "/matches/admin/import",
     status_code=status.HTTP_201_CREATED
 )
-def import_matches(current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+def import_matches(competition: str = Query('WC'), current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     match_service = MatchService()
-    return match_service.import_matches(db)
+    return match_service.import_matches(db, competition)
 
 @router.get(
     "/matches/admin/{id}/bets",

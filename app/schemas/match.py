@@ -5,6 +5,7 @@ from app.models.enum.match_enum import MatchStatus, MatchResult
 
 class MatchApiData(BaseModel):
     api_match_id: str
+    competition: Optional[str] = None
     stage: Optional[str] = None
     match_date: Optional[datetime] = None
     status: Optional[MatchStatus] = None
@@ -28,12 +29,18 @@ class FootballApiResponse(BaseModel):
             # chaves vazia ou nulas não quebram o mapeamento .get()
             full_time = match.get('score', {}).get('fullTime') or {}
             score = match.get('score') or {}
+
+            api_status = match.get('status')
+
+            if api_status == "SCHEDULED":
+                api_status = "TIMED"
             
             transformed.append({
                 "api_match_id": str(match.get("id")),
+                "competition": (match.get("competition") or {}).get('code'),
                 'stage': match.get('stage'),
                 'match_date': match.get('utcDate'),
-                'status': match.get('status'),
+                'status': api_status,
                 "home_team": (match.get("homeTeam") or {}).get('name'), 
                 "away_team": (match.get("awayTeam") or {}).get('name'), 
                 "home_score": full_time.get("home"), 
@@ -45,6 +52,7 @@ class FootballApiResponse(BaseModel):
 class MatchResponse(BaseModel):
     id: int
     api_match_id: str
+    competition: Optional[str] = None
     stage: Optional[str] = None
     match_date: Optional[datetime] = None
     status: Optional[MatchStatus] = None # Enum

@@ -30,7 +30,8 @@ class MatchRepository(BaseRepository[Match]):
 
     def filter_matches(
         self, 
-        session: Session, 
+        session: Session,
+        competition: Optional[str] = None,
         team_name: Optional[str] = None,
         status: Optional[MatchStatus] = None,
         stage: Optional[str] = None,
@@ -39,6 +40,9 @@ class MatchRepository(BaseRepository[Match]):
     ):
         query = select(self.model)
         filters = []
+
+        if competition is not None:
+            filters.append(self.model.competition == competition.upper())
 
         if team_name is not None:
             filters.append(or_(

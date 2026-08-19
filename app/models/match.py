@@ -13,6 +13,7 @@ class Match(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     api_match_id: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    competition: Mapped[str] = mapped_column(String(20), nullable=False, default='WC')
     home_team: Mapped[str] = mapped_column(String(100))
     away_team: Mapped[str] = mapped_column(String(100))
     match_date: Mapped[datetime] = mapped_column(nullable=False)

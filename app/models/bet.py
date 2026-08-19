@@ -2,7 +2,8 @@ import uuid
 from .base import Base
 from typing import TYPE_CHECKING
 from datetime import datetime
-from sqlalchemy import Uuid, ForeignKey, Enum, func
+from decimal import Decimal
+from sqlalchemy import Uuid, ForeignKey, Enum, func, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .enum.bet_enum import BetPrediction, BetStatus, BetResult
 
@@ -17,7 +18,7 @@ class Bet(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     match_id: Mapped[int] = mapped_column(ForeignKey("match.id", ondelete="CASCADE"))
     prediction: Mapped[BetPrediction] = mapped_column(Enum(BetPrediction), nullable=False)
-    points_bet: Mapped[int] = mapped_column(nullable=False)
+    points_bet: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     odds: Mapped[float] = mapped_column(nullable=False)
     result: Mapped[BetResult] = mapped_column(Enum(BetResult), nullable=True)
     status: Mapped[BetStatus] = mapped_column(Enum(BetStatus), default=BetStatus.PENDING)
