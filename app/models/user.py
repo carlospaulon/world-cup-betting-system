@@ -1,8 +1,8 @@
 import uuid
 from typing import TYPE_CHECKING
 from datetime import datetime, date
-from sqlalchemy import Uuid
-from sqlalchemy import func
+from decimal import Decimal
+from sqlalchemy import Uuid, func, Numeric, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String
 from sqlalchemy import Boolean
@@ -20,10 +20,11 @@ class User(Base):
     cpf: Mapped[str] = mapped_column(String(11), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     date_of_birth: Mapped[date] = mapped_column()
-    points: Mapped[int] = mapped_column(default=100)
+    points: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=Decimal("100.00"), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now()) # server default, ensure that we have the exacly registry of the timestamp
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now(), nullable=False)
 
     bets: Mapped[list["Bet"]] = relationship(
         back_populates="user",
