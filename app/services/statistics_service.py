@@ -32,8 +32,8 @@ class StatisticsService:
 
         return match_stats
 
-    def get_user_stats(self, session: Session, user_id: uuid.UUID):
-        stats = statistics_repository.get_user_stats(session, user_id)
+    def get_user_stats(self, session: Session, cpf: str):
+        stats = statistics_repository.get_user_stats(session, cpf)
 
         if not stats:
             raise UserNotFoundException()

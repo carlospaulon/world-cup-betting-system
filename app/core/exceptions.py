@@ -64,3 +64,7 @@ class InsufficientPointsException(AppException):
 class BetAlreadySettledException(AppException):
     def __init__(self, message: str = 'Bet already settled', status_code: int = 409):
         super().__init__(message, status_code)
+
+class InsufficientMatchDataException(AppException):
+    def __init__(self, message: str = 'Not enough data for the prediction', status_code: int = 422):
+        super().__init__(message, status_code)

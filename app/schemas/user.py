@@ -1,6 +1,7 @@
 import uuid
 from datetime import date, datetime
 from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
+from decimal import Decimal
 from validate_docbr import CPF
 from app.core.exceptions import UnderageUserException
 from app.core.security import validate_password_strength
@@ -47,8 +48,9 @@ class UserResponse(BaseModel):
     id: uuid.UUID
     nickname: str
     email: str
-    points: int
+    points: Decimal
     is_active: bool
+    is_admin: bool
     created_at: datetime
     updated_at: datetime
 

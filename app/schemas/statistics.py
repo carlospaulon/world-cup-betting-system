@@ -49,7 +49,7 @@ class SystemStats(BaseModel):
     total_users: int
     active_users: int
     total_bets: int
-    total_points_in_system: int
+    total_points_in_system: Decimal
     total_matches: int
     matches_open: int
     matches_finished: int
