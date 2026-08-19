@@ -2,6 +2,7 @@ import uuid
 from app.models.enum.bet_enum import BetPrediction
 from app.models.enum.match_enum import MatchStatus
 from pydantic import BaseModel, computed_field
+from decimal import Decimal
 
 # admin
 class MatchStats(BaseModel):
@@ -38,8 +39,8 @@ class UserStats(BaseModel):
 
         return (self.won_bets / self.total_bets) * 100
 
-    current_points: int
-    points_invested: int
+    current_points: Decimal
+    points_invested: Decimal
     favorite_prediction: BetPrediction | None
     favorite_team: str | None # mais apostou
 

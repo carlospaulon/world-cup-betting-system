@@ -1,6 +1,7 @@
 import uuid
 from fastapi import HTTPException
 from typing import Optional
+from decimal import Decimal
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.models.match import Match
@@ -76,7 +77,7 @@ class BetService:
 
 
     # calcula no momento da criação da Bet
-    def calculate_odds(self, session: Session, match_id: int, prediction: BetPrediction) -> float:
+    def calculate_odds(self, session: Session, match_id: int, prediction: BetPrediction) -> Decimal:
         home_count = bet_repository.count_by_prediction(session, match_id, BetPrediction.HOME_WIN)
         away_count = bet_repository.count_by_prediction(session, match_id, BetPrediction.AWAY_WIN)
 
@@ -149,7 +150,7 @@ class BetService:
 
             if bet.prediction == match.match_result:
                 bet.result = BetResult.WON
-                poinst_earned = round(bet.points_bet * bet.odds, 2)
+                poinst_earned = round(bet.points_bet * Decimal(str(bet.odds)), 2)
                 user_repository.update_points(session, user.id, poinst_earned)
 
             elif bet.prediction == MatchResult.DRAW:
