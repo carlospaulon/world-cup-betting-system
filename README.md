@@ -1,6 +1,17 @@
-﻿# World Cup Betting System — PalpiteCopa
+﻿# World Cup Betting System - PalpiteCopa
 
 Sistema completo de apostas e palpites esportivos voltado para a Copa do Mundo 2026 e o Brasileirão. O projeto conta com um backend em FastAPI, inteligência artificial para predição de partidas com Machine Learning, pipeline de exportação de dados analíticos e um frontend responsivo em React.
+
+---
+
+## Aplicação em Produção (Deploy - Render)
+
+Acesse o sistema online através dos links abaixo:
+
+- **Frontend Web (Aplicação):** [https://world-cup-betting-system-frontend.onrender.com/](https://world-cup-betting-system-frontend.onrender.com/)
+- **Backend API (Swagger Docs):** [https://world-cup-betting-system.onrender.com/docs](https://world-cup-betting-system.onrender.com/docs)
+
+> **Nota sobre a hospedagem (Render Free Tier):** Por estar hospedado na camada gratuita do Render, o servidor backend entra em modo de repouso (*sleep*) se ficar inativo. Caso o primeiro carregamento demore cerca de 30 a 50 segundos, aguarde enquanto o servidor reinicia automaticamente.
 
 ---
 
