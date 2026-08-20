@@ -48,6 +48,7 @@ class UserResponse(BaseModel):
     id: uuid.UUID
     nickname: str
     email: str
+    cpf: str
     points: Decimal
     is_active: bool
     is_admin: bool
