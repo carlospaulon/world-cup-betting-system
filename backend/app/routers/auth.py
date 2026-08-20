@@ -19,6 +19,20 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED
 )
 def create_user(user_in: UserCreate, db: Session = Depends(get_db)):
+    """
+    Register a new user:
+
+    - **nickname**: Each user must have a nickname
+    - **email**: Valid email address
+    - **cpf**: Brazilian CPF (must be unique)
+    - **password**: Strong password
+    - **date_of_birth**: User must be at least 18 years old
+
+    Returns:
+
+    - Created user information.
+    """
+
     user_service = UserService()
     return user_service.register_user(db, user_in)
 
@@ -28,6 +42,15 @@ def create_user(user_in: UserCreate, db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK
 )
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    """
+    Authenticate user and generate OAuth2 JWT access token.
+
+    - **username**: Registered email address
+    - **password**: Plaintext password
+
+    Returns:
+    - **Token**: Bearer JWT access token for authorized requests.
+    """
     
     data = LoginRequest(
         email=form_data.username,

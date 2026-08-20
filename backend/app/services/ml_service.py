@@ -21,6 +21,20 @@ class MLService:
         session: Session,
         team_name: str
     ):
+        """
+        Extract historical statistical metrics for a specific team to build model features.
+
+        Args:
+            session (Session): Current database session.
+            team_name (str): Target team name.
+
+        Raises:
+            InsufficientMatchDataException: If the team has fewer than 3 completed matches.
+
+        Returns:
+            Dict[str, float]: Dictionary containing average goals, conceded goals, win, draw, and loss rates.
+        """
+        
         stats = statistics_repository.get_team_stats(
             session,
             team_name
@@ -40,7 +54,21 @@ class MLService:
         }
 
     def train_model(self, session: Session) -> Dict[str, Any]:
-        """Busca todas as partidas FINISHED e treina o modelo de regressão logística."""
+        """
+        Fetch all FINISHED matches, extract team features, and train a Logistic Regression model.
+
+        Saves the trained model instance to disk at MODEL_PATH.
+
+        Args:
+            session (Session): Current database session.
+
+        Raises:
+            InsufficientMatchDataException: If fewer than 10 valid training samples exist in the database.
+
+        Returns:
+            Dict[str, Any]: Dictionary containing status and total samples trained.
+        """
+
         finished_matches = match_repository.filter_matches(session=session, status=MatchStatus.FINISHED)
         
         X: List[Dict[str, float]] = []
@@ -70,7 +98,7 @@ class MLService:
             y.append(m.match_result.value)
 
         if len(X) < 10:
-            raise InsufficientMatchDataException("Partidas finalizadas insuficientes na base para treinar o modelo.")
+            raise InsufficientMatchDataException()
 
         df_X = pd.DataFrame(X)
         model = LogisticRegression(max_iter=1000)
@@ -82,7 +110,20 @@ class MLService:
         return {"status": "success", "samples_trained": len(X)}
 
     def predict_match(self, session: Session, match_id: int) -> MatchPredictionResponse:
-        """Carrega o modelo .pkl, compõe os vetores do jogo e retorna a predição."""
+        """
+        Load the trained model, compute team feature vectors, and predict match probabilities.
+
+        Args:
+            session (Session): Current database session.
+            match_id (int): Target match ID.
+
+        Raises:
+            MatchNotFoundException: Target match ID does not exist.
+
+        Returns:
+            MatchPredictionResponse: Schema containing outcome probabilities and predicted winner.
+        """
+
         match = match_repository.get_by_id(session, match_id)
         if not match:
             raise MatchNotFoundException()

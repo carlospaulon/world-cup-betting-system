@@ -19,6 +19,13 @@ def export_system_stats_csv(
     current_admin: User = Depends(get_current_admin), 
     db: Session = Depends(get_db)
 ):
+    """
+    Export global system statistics as a downloadable CSV report (Admin only).
+
+    Returns:
+    - **Response**: Streaming text/csv attachment containing system stats.
+    """
+
     export_service = ExportService()
     csv_data = export_service.export_system_csv(db)
 
@@ -40,6 +47,15 @@ def export_user_stats_csv(
     current_admin: User = Depends(get_current_admin), 
     db: Session = Depends(get_db)
 ):
+    """
+    Export user betting performance metrics as a downloadable CSV report (Admin only).
+
+    - **cpf**: Target user CPF identifier
+
+    Returns:
+    - **Response**: Streaming text/csv attachment containing user stats.
+    """
+    
     export_service = ExportService()
     csv_data = export_service.export_user_csv(db, cpf)
 
@@ -60,6 +76,15 @@ def export_match_stats_csv(
     current_admin: User = Depends(get_current_admin), 
     db: Session = Depends(get_db)
 ):
+    """
+    Export match betting breakdown and calculated odds as a downloadable CSV report (Admin only).
+
+    - **match_id**: Target match ID
+
+    Returns:
+    - **Response**: Streaming text/csv attachment containing match stats.
+    """
+    
     export_service = ExportService()
     csv_data = export_service.export_match_csv(db, match_id)
 
@@ -80,6 +105,15 @@ def export_team_stats_csv(
     current_admin: User = Depends(get_current_admin), 
     db: Session = Depends(get_db)
 ):
+    """
+    Export team historical performance metrics as a downloadable CSV report (Admin only).
+
+    - **team**: Target team name
+
+    Returns:
+    - **Response**: Streaming text/csv attachment containing team stats.
+    """
+    
     export_service = ExportService()
     csv_data = export_service.export_team_csv(db, team)
 

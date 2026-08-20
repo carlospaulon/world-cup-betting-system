@@ -17,6 +17,15 @@ router = APIRouter(
     status_code=status.HTTP_200_OK
 )
 def get_match_prediction(match_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Generate machine learning outcome predictions and win probabilities for a match.
+
+    - **match_id**: Target match ID
+
+    Returns:
+    - **MatchPredictionResponse**: Win, draw, and loss probability distribution along with the predicted winner.
+    """
+
     ml_service = MLService()
     return ml_service.predict_match(db, match_id)
 
@@ -25,6 +34,12 @@ def get_match_prediction(match_id: int, current_user: User = Depends(get_current
     status_code=status.HTTP_200_OK
 )
 def retrain_ml_model(current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
-    """Endpoint para forçar o retreinamento do modelo quando novos jogos forem importados/finalizados."""
+    """
+    Force retraining of the Machine Learning Logistic Regression model on finished matches (Admin only).
+
+    Returns:
+    - **dict**: Summary indicating successful model training and total samples used.
+    """
+
     ml_service = MLService()
     return ml_service.train_model(db)

@@ -13,6 +13,20 @@ headers = {'X-Auth-Token': API_KEY}
 class FootballService:
 
     def fetch_matches(self, competition='WC', season=2026):
+        """
+        Fetch competition matches from external Football API endpoint.
+
+        Args:
+            competition (str): Target competition code (e.g., WC or BSA).
+            season (int): Competition season year.
+
+        Raises:
+            ServiceUnavailableException: If external API network request fails or returns non-200 status.
+
+        Returns:
+            dict: Raw JSON API response containing match fixtures.
+        """
+
         try:
             with httpx.Client() as client:
                 response = client.get(
@@ -29,6 +43,16 @@ class FootballService:
 
     
     def fetch_match_by_id(self, match_id: int):
+        """
+        Retrieve single match details from external API by external match ID.
+
+        Args:
+            match_id (int): External match ID.
+
+        Returns:
+            dict: Raw JSON response containing full match data.
+        """
+
         with httpx.Client() as client:
             response = client.get(
                 f'https://api.football-data.org/v4/matches/{match_id}', 
@@ -37,6 +61,15 @@ class FootballService:
             return response.json()
         
     def map_to_match(self, data: MatchApiData):
+        """
+        Map external API DTO schema into internal SQLAlchemy Match entity model.
+
+        Args:
+            data (MatchApiData): Validated API response data.
+
+        Returns:
+            Match: Instantiated internal Match model instance.
+        """
 
         match = Match(
             api_match_id = data.api_match_id,

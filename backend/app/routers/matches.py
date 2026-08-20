@@ -33,6 +33,21 @@ def get_matches(
     from_date: Optional[date] = Query(None, description="From Date (AAAA-MM-DD)"),
     to_date: Optional[date] = Query(None, description="To Date (AAAA-MM-DD)"),
     ):
+    """
+    Retrieve matches matching specified filter criteria.
+
+    Calculates dynamic odds for open matches.
+
+    - **competition**: Target competition code (default: WC)
+    - **team**: Optional search string for team names
+    - **match_status**: Status filter (TIMED, IN_PLAY, FINISHED, POSTPONED)
+    - **is_bet_available**: Filter by betting availability flag
+    - **stage**: Competition stage filter
+    - **from_date / to_date**: Date range filter
+
+    Returns:
+    - **list[MatchResponse]**: List of matches with calculated odds.
+    """
 
     match_service = MatchService()
 
@@ -54,6 +69,15 @@ def get_matches(
     status_code=status.HTTP_200_OK
 )
 def get_team_history(team: str, db: Session = Depends(get_db)):
+    """
+    Retrieve historical finished matches for a specific team.
+
+    - **team**: Target team name
+
+    Returns:
+    - **list[MatchResponse]**: List of past finished matches involving the team.
+    """
+
     match_service = MatchService()
 
     return match_service.get_team_history(db, team)
@@ -67,6 +91,15 @@ def get_team_history(team: str, db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK
 )
 def get_matches(match_id: int, db: Session = Depends(get_db)):
+    """
+    Retrieve details of a single match by ID.
+
+    - **match_id**: Target match integer ID
+
+    Returns:
+    - **MatchResponse**: Detailed match entity data.
+    """
+
     
     return match_repository.get_by_id(db, match_id)
 
@@ -77,6 +110,15 @@ def get_matches(match_id: int, db: Session = Depends(get_db)):
     status_code=status.HTTP_201_CREATED
 )
 def import_matches(competition: str = Query('WC'), current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    """
+    Import competition matches from external Football API (Admin only).
+
+    - **competition**: Code of the competition to import (default: WC)
+
+    Returns:
+    - **dict**: Summary containing count of imported and ignored existing matches.
+    """
+
     match_service = MatchService()
     return match_service.import_matches(db, competition)
 
@@ -86,12 +128,30 @@ def import_matches(competition: str = Query('WC'), current_admin: User = Depends
     response_model=list[BetResponse]
 )
 def get_match_bets(id: int, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    """
+    Retrieve all bets placed on a specific match (Admin only).
+
+    - **id**: Target match ID
+
+    Returns:
+    - **list[BetResponse]**: List of all user bets associated with the match.
+    """
+    
     return bet_repository.get_bets_for_match(db, id)
 
 @router.patch(
     "/matches/admin/{id}/finish",
 )
 def finish_match(id: int, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    """
+    Fetch external match results, update match score, and settle pending bets (Admin only).
+
+    - **id**: Target match ID
+
+    Returns:
+    - **MatchResponse**: Updated match instance marked as FINISHED.
+    """
+
     match_service = MatchService()
 
     return match_service.finish_match(db, id)
@@ -100,6 +160,15 @@ def finish_match(id: int, current_admin: User = Depends(get_current_admin), db: 
     "/matches/admin/{match_id}/status"
 )
 def update_status(match_id: int, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    """
+    Reset match status back to TIMED (Admin only).
+
+    - **match_id**: Target match ID
+
+    Returns:
+    - **MatchResponse**: Updated match instance.
+    """
+
     match_service = MatchService()
 
     return match_service.update_status(db, match_id)
@@ -109,6 +178,15 @@ def update_status(match_id: int, current_admin: User = Depends(get_current_admin
     "/matches/admin/{match_id}/availability"
 )
 def update_bet_availability(match_id: int, current_admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    """
+    Toggle betting availability for a TIMED match (Admin only).
+
+    - **match_id**: Target match ID
+
+    Returns:
+    - **MatchResponse**: Updated match instance with enabled betting availability.
+    """
+
     match_service = MatchService()
 
     return match_service.update_bet_availability(db, match_id)

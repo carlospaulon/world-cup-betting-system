@@ -9,6 +9,22 @@ from app.core.security import hash_password, verify_password, validate_password_
 
 class UserService:
     def register_user(self, session: Session, user_data: UserCreate) -> UserResponse:
+        """
+        Register a new user account with initial points balance.
+
+        Validates uniqueness of email and CPF identifiers.
+
+        Args:
+            session (Session): Current database session.
+            user_data (UserCreate): Registration input payload.
+
+        Raises:
+            UserAlreadyExistsException: If email or CPF is already registered.
+
+        Returns:
+            UserResponse: Validated schema of created user account.
+        """
+
         existing_user = user_repository.get_by_email(session, user_data.email)
 
         if existing_user:
@@ -44,6 +60,23 @@ class UserService:
         return UserResponse.model_validate(created_user)
 
     def update_is_admin(self, session: Session, admin_user: User, user_id: uuid.UUID):
+        """
+        Promote a standard user to administrator status.
+
+        Args:
+            session (Session): Current database session.
+            admin_user (User): Requesting administrator user entity.
+            user_id (uuid.UUID): Target user UUID to promote.
+
+        Raises:
+            UserNotFoundException: Target user does not exist.
+            UserAlreadyIsAdminException: User is already an administrator.
+            InvalidCredentialsException: Requesting user lacks administrator privileges.
+
+        Returns:
+            User: Updated target user instance with administrator rights.
+        """
+
         user = user_repository.get_by_id(session, user_id)
 
         if not user:
@@ -61,6 +94,22 @@ class UserService:
 
     
     def update_password(self, session: Session, user_id,  data: UserUpdatePassword):
+        """
+        Change an existing user's password following current password validation and strength rules.
+
+        Args:
+            session (Session): Current database session.
+            user_id (uuid.UUID): Target user UUID.
+            data (UserUpdatePassword): Current and new password payload.
+
+        Raises:
+            UserNotFoundException: Target user does not exist.
+            InvalidCredentialsException: Provided current password is incorrect.
+
+        Returns:
+            User: Updated user model instance with refreshed hashed password.
+        """
+
         user = user_repository.get_by_id(session, user_id)
 
         if not user:

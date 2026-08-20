@@ -13,6 +13,17 @@ from app.services.bet_service import BetService
 
 class MatchService:
     def import_matches(self, session: Session, competition: str = 'WC'):
+        """
+        Fetch matches from external football provider and persist missing entries.
+
+        Args:
+            session (Session): Current database session.
+            competition (str): Target competition identifier code.
+
+        Returns:
+            dict: Summary containing counts of newly imported and ignored matches.
+        """
+
         # controle
         ignored = 0
         imported = 0
@@ -52,6 +63,27 @@ class MatchService:
             from_date: Optional[date] = None,
             to_date: Optional[date] = None,
         ):
+        """
+        Query matches based on criteria and calculate live dynamic odds for open fixtures.
+
+        Args:
+            session (Session): Current database session.
+            competition (str): Competition filter.
+            team_name (Optional[str]): Search filter for team names.
+            match_status (Optional[MatchStatus]): Status filter.
+            is_bet_available (Optional[bool]): Filter for betting availability.
+            stage (Optional[str]): Competition stage filter.
+            from_date (Optional[date]): Range start date.
+            to_date (Optional[date]): Range end date.
+
+        Raises:
+            InvalidDateRangeException: If from_date is greater than to_date.
+            MatchNotFoundException: If no matches match the provided filters.
+
+        Returns:
+            list[MatchResponse]: Enriched match list containing dynamic calculated odds.
+        """
+
 
         bet_service = BetService()
 
@@ -95,8 +127,21 @@ class MatchService:
         return open_matches
 
 
-    # list de matchresponse?
     def get_team_history(self, session: Session, team_name: str) -> list[Match]:
+        """
+        Retrieve historical finished matches for a given team name.
+
+        Args:
+            session (Session): Current database session.
+            team_name (str): Search string for home or away team.
+
+        Raises:
+            MatchNotFoundException: If no finished matches are found for the team.
+
+        Returns:
+            list[Match]: Historical finished matches.
+        """
+
         team_history = match_repository.get_by_team(session, team_name)
 
         if not team_history:
@@ -105,6 +150,20 @@ class MatchService:
         return team_history
     
     def finish_match(self, session: Session, id: int):
+        """
+        Fetch external match final scores, update status to FINISHED, and trigger bet settlement.
+
+        Args:
+            session (Session): Current database session.
+            id (int): Match entity database ID.
+
+        Raises:
+            MatchNotFoundException: If the target match does not exist.
+
+        Returns:
+            MatchResponse: Updated match entity with final score and status.
+        """
+
         current_match = match_repository.get_by_id(session, id)
         
         if not current_match:
@@ -152,6 +211,20 @@ class MatchService:
         return MatchResponse.model_validate(update_match)
 
     def update_status(self, session: Session, match_id: int):
+        """
+        Reset match status to TIMED.
+
+        Args:
+            session (Session): Current database session.
+            match_id (int): Target match ID.
+
+        Raises:
+            MatchNotFoundException: Target match ID not found.
+
+        Returns:
+            MatchResponse: Updated match schema.
+        """
+
         current_match = match_repository.get_by_id(session, match_id)
                 
         if not current_match:
@@ -161,6 +234,21 @@ class MatchService:
         return MatchResponse.model_validate(update_match)
 
     def update_bet_availability(self, session: Session, match_id: int):
+        """
+        Enable betting availability on a TIMED match.
+
+        Args:
+            session (Session): Current database session.
+            match_id (int): Target match ID.
+
+        Raises:
+            MatchNotFoundException: Target match ID not found.
+            MatchNotOpenException: Match status is not TIMED.
+
+        Returns:
+            MatchResponse: Updated match schema with available bets.
+        """
+
         current_match = match_repository.get_by_id(session, match_id)
 
         if not current_match:

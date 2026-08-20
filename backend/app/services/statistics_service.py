@@ -10,6 +10,20 @@ bet_service = BetService()
 
 class StatisticsService:
     def get_match_stats(self, session: Session, match_id: int):
+        """
+        Aggregate betting statistics and current calculated odds for a given match.
+
+        Args:
+            session (Session): Current database session.
+            match_id (int): Target match ID.
+
+        Raises:
+            MatchNotFoundException: If the target match does not exist.
+
+        Returns:
+            MatchStats: Validated match statistics schema.
+        """
+
 
         # row mapping dict - imutavel
         stats = statistics_repository.get_match_stats(session, match_id)
@@ -32,6 +46,20 @@ class StatisticsService:
         return match_stats
 
     def get_user_stats(self, session: Session, cpf: str):
+        """
+        Retrieve global betting performance statistics for a user identified by CPF.
+
+        Args:
+            session (Session): Current database session.
+            cpf (str): Target user CPF identifier.
+
+        Raises:
+            UserNotFoundException: If the target user is not found.
+
+        Returns:
+            UserStats: Validated user performance statistics schema.
+        """
+
         stats = statistics_repository.get_user_stats(session, cpf)
 
         if not stats:
@@ -42,6 +70,16 @@ class StatisticsService:
         return user_stats
 
     def get_system_stats(self, session: Session):
+        """
+        Retrieve global system platform metrics.
+
+        Args:
+            session (Session): Current database session.
+
+        Returns:
+            SystemStats: Validated system metrics schema.
+        """
+
         stats = statistics_repository.get_system_stats(session)
 
         system_stats = SystemStats.model_validate(stats)
@@ -49,6 +87,20 @@ class StatisticsService:
         return system_stats
 
     def get_team_stats(self, session: Session, team: str):
+        """
+        Aggregate historical performance stats for a specified team.
+
+        Args:
+            session (Session): Current database session.
+            team (str): Target team name.
+
+        Raises:
+            TeamNotFoundException: If no match history exists for the team.
+
+        Returns:
+            TeamStats: Validated team statistics schema.
+        """
+
         team_history = match_repository.get_by_team(session, team)
 
         if not team_history:

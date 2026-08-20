@@ -6,6 +6,16 @@ from app.services.statistics_service import StatisticsService
 statistics_service = StatisticsService()
 class ExportService:
     def export_system_csv(self, session: Session):
+        """
+        Generate CSV string containing global system statistics metrics.
+
+        Args:
+            session (Session): Current database session.
+
+        Returns:
+            str: CSV formatted string.
+        """
+
         stats = statistics_service.get_system_stats(session)
 
         output = io.StringIO()
@@ -30,6 +40,17 @@ class ExportService:
 
 
     def export_user_csv(self, session: Session, cpf: str):
+        """
+        Generate CSV string containing betting performance metrics for a specific user lookup by CPF.
+
+        Args:
+            session (Session): Current database session.
+            cpf (str): Target user CPF.
+
+        Returns:
+            str: CSV formatted string.
+        """
+
         stats = statistics_service.get_user_stats(session, cpf)
 
         output = io.StringIO()
@@ -58,6 +79,17 @@ class ExportService:
         return output.getvalue()
 
     def export_match_csv(self, session: Session, match_id: int):
+        """
+        Generate CSV string containing bet distributions and calculated odds for a specific match.
+
+        Args:
+            session (Session): Current database session.
+            match_id (int): Target match ID.
+
+        Returns:
+            str: CSV formatted string.
+        """
+
         stats = statistics_service.get_match_stats(session, match_id)
 
         output = io.StringIO()
@@ -85,29 +117,40 @@ class ExportService:
         return output.getvalue()
 
     def export_team_csv(self, session: Session, team: str):
-            stats = statistics_service.get_team_stats(session, team)
-    
-            output = io.StringIO()
+        """
+        Generate CSV string containing historical match performance stats for a given team.
+
+        Args:
+            session (Session): Current database session.
+            team (str): Target team name.
+
+        Returns:
+            str: CSV formatted string.
+        """
             
-            writer = csv.DictWriter(
-                output,
-                fieldnames=[
-                    'team',
-                    'matches',
-                    'wins',
-                    'draws',
-                    'losses',
-                    'goals_scored',
-                    'goals_conceded',
-                    'goal_difference',
-                    'win_rate',
-                ],
-            )
-            
-            writer.writeheader()
-            writer.writerow(stats.model_dump())
-    
-            return output.getvalue()
+        stats = statistics_service.get_team_stats(session, team)
+
+        output = io.StringIO()
+        
+        writer = csv.DictWriter(
+            output,
+            fieldnames=[
+                'team',
+                'matches',
+                'wins',
+                'draws',
+                'losses',
+                'goals_scored',
+                'goals_conceded',
+                'goal_difference',
+                'win_rate',
+            ],
+        )
+        
+        writer.writeheader()
+        writer.writerow(stats.model_dump())
+
+        return output.getvalue()
 
 
 

@@ -11,6 +11,17 @@ from sqlalchemy import select, func, case, or_, and_
 class StatisticsRepository():
 
     def get_match_stats(self, session: Session, match_id: int):
+        """
+        Calculate total bet counts grouped by prediction outcome for a specific match.
+
+        Args:
+            session (Session): Current database session.
+            match_id (int): Target match ID.
+
+        Returns:
+            dict | None: Row mapping dict with match info and bet counts, or None if match doesn't exist.
+        """
+
         # pega infos padrão da partida (infos iniciais pego no service para montar), conta as bets e prediction + odds
         query = (select(
             Match.id.label("match_id"),
@@ -41,8 +52,18 @@ class StatisticsRepository():
         result = session.execute(query)
         return result.mappings().first() # retorna um dict
 
-    # checar performance!
     def get_user_stats(self, session: Session, cpf: str):
+        """
+        Calculate user betting history, favorite prediction, and most betted team.
+
+        Args:
+            session (Session): Current database session.
+            cpf (str): Target user CPF.
+
+        Returns:
+            dict: Aggregated dictionary containing general stats, favorite prediction, and favorite team.
+        """
+
         # stats geral
         query_general = (select(
             User.id.label("user_id"),
@@ -119,6 +140,16 @@ class StatisticsRepository():
         return data
 
     def get_system_stats(self, session: Session):
+        """
+        Execute subqueries to assemble global system overview stats.
+
+        Args:
+            session (Session): Current database session.
+
+        Returns:
+            dict: Platform metrics mapping.
+        """
+
         # cada campo com count ou sum como subquery
         total_users = select(func.count(User.id)).scalar_subquery()
         active_users = (select(func.count(User.id))
@@ -145,6 +176,17 @@ class StatisticsRepository():
         return result.mappings().first()
 
     def get_team_stats(self, session: Session, team_name: str):
+        """
+        Calculate historical wins, draws, losses, goals scored, and goals conceded for a team.
+
+        Args:
+            session (Session): Current database session.
+            team_name (str): Target team name.
+
+        Returns:
+            dict: Team performance metrics.
+        """
+
         search_pattern = f"%{team_name}%" # ajuda a encontrar o ilike com %
 
         team_filter = or_(
